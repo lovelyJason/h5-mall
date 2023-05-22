@@ -12,7 +12,7 @@ const setting: Record<'canBuy' | 'price', any> = reactive({
 
 <template>
   <div style="overflow: hidden;">
-    <Topbar />
+    <Topbar title="申请成为分销商" />
     <div class="noApply" v-if="applyStatus == -1">
       <van-empty description="诚邀您成为分销商" />
       <div class="block-btn">

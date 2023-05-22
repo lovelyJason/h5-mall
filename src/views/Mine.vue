@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Tabbar from '@/components/Tabbar.vue'  // TODO:不加后缀没识别
-import Topbar from '@/components/Topbar.vue'
 import { useRouter } from 'vue-router';
 
 const router = useRouter()
@@ -13,7 +12,6 @@ const gotoApply = () => {
 
 <template>
   <div class="mine">
-    <Topbar />
     <div class="header-box">
       <div class="header-box-left">
         <div class="avatar"></div>

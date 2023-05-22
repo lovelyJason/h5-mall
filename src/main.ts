@@ -7,10 +7,16 @@ import { Button, Search, Tabbar, TabbarItem, Tab, Tabs, Sidebar, SidebarItem, Ro
 // 2. 引入组件样式
 import 'vant/lib/index.css';
 
+import WEBAPI from 'apifm-webapi'
+
 import App from './App.vue'
 import router from './router'
 
+
 const app = createApp(App)
+
+WEBAPI.init('wxapi')  // 设置专属域名
+app.provide('$wxapi', WEBAPI);
 
 app.use(Button)
 app.use(Search)

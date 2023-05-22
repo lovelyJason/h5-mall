@@ -1,13 +1,69 @@
 <script setup lang="ts">
 import Tabbar from '@/components/Tabbar.vue'  // TODO:不加后缀没识别
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted, inject, toRefs } from 'vue'
 import { useRouter } from 'vue-router';
 
 const router = useRouter()
 
-const searchValue = ref('')
-const currentCategory = ref(0)
+const $wxapi: any = inject('$wxapi')
+console.log($wxapi)
 
+const searchValue = ref('')
+const currentCategory = ref<number>(0)
+const categorySelected = ref<any>({
+  name: '',
+  id: ''
+})
+const firstCategories = ref<Array<any>>([])
+
+const categories = async () => {
+  // wx.showLoading({
+  //   title: '',
+  // })
+  const res = await $wxapi.goodsCategory()
+  // wx.hideLoading()
+  if (res.code == 0) {
+    const categories = res.data.filter((ele: any) => {
+      return !ele.vopCid1 && !ele.vopCid2
+    })
+    categories.forEach((p: any) => {
+      p.childs = categories.filter((ele: any) => {
+        return p.id == ele.pid
+      })
+    })
+    // firstCategories.value = categories.filter((ele: any) => { return ele.level == 1 })
+    let $firstCategories = categories.filter((ele: any) => { return ele.level == 1 })
+    if (categorySelected.id) {
+      let $currentCategory = $firstCategories.findIndex((ele: any) => {
+        return ele.id == categorySelected.id
+      })
+      categorySelected.value = $firstCategories[$currentCategory]
+      currentCategory.value = $currentCategory
+    } else {
+      categorySelected.value = $firstCategories[0]
+    }
+    firstCategories.value = $firstCategories
+    console.log(firstCategories.value)
+    // const resAd = await $wxapi.adPosition('category_' + categorySelected.id)
+    // let adPosition = null
+    // if (resAd.code === 0) {
+      // adPosition = resAd.data
+    // }
+    // this.setData({
+    //   page: 1,
+    //   currentCategory,
+    //   categories,
+    //   firstCategories,
+    //   categorySelected,
+    //   adPosition
+    // })
+    // this.getGoodsList()
+  }
+}
+
+onMounted(() => {
+  categories()
+})
 
 </script>
 
@@ -17,8 +73,7 @@ const currentCategory = ref(0)
     <van-row style="height: calc(100vh - 120px);" justify="space-between">
       <van-col class="category-col" span="6">
         <van-sidebar v-model="currentCategory">
-          <van-sidebar-item title="号卡" />
-          <van-sidebar-item title="流量" />
+          <van-sidebar-item  v-for="category in firstCategories" :key="category.id"  :title="category.name" />
         </van-sidebar>
       </van-col>
       <van-col class="product-col" span="16">
