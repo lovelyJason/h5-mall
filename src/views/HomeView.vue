@@ -6,15 +6,22 @@ import { useRouter } from 'vue-router';
 const router = useRouter()
 
 const $wxapi: any = inject('$wxapi')
+const WXAPI = $wxapi
 console.log($wxapi)
 
 const searchValue = ref('')
-const currentCategory = ref<number>(0)
-const categorySelected = ref<any>({
+const activeCategory = ref<number>(0)
+const secondCategoryId = ref<string>('0')
+const page = ref<number>(1)
+const pageSize = ref<number>(50)
+const scrolltop = ref<number>(0)
+
+const categorySelected = reactive<any>({
   name: '',
   id: ''
 })
-const firstCategories = ref<Array<any>>([])
+const firstCategories = reactive<Array<any>>([])
+const currentGoods = reactive<Array<any>>([])
 
 const categories = async () => {
   // wx.showLoading({
@@ -32,33 +39,79 @@ const categories = async () => {
       })
     })
     // firstCategories.value = categories.filter((ele: any) => { return ele.level == 1 })
-    let $firstCategories = categories.filter((ele: any) => { return ele.level == 1 })
+    Object.assign(firstCategories, categories.filter((ele: any) => { return ele.level == 1 }))
     if (categorySelected.id) {
-      let $currentCategory = $firstCategories.findIndex((ele: any) => {
+      activeCategory.value = firstCategories.findIndex((ele: any) => {
         return ele.id == categorySelected.id
       })
-      categorySelected.value = $firstCategories[$currentCategory]
-      currentCategory.value = $currentCategory
+      Object.assign(categorySelected, firstCategories[activeCategory.value])
     } else {
-      categorySelected.value = $firstCategories[0]
+      Object.assign(categorySelected, firstCategories[0])
     }
-    firstCategories.value = $firstCategories
-    console.log(firstCategories.value)
-    // const resAd = await $wxapi.adPosition('category_' + categorySelected.id)
-    // let adPosition = null
-    // if (resAd.code === 0) {
-      // adPosition = resAd.data
-    // }
-    // this.setData({
-    //   page: 1,
-    //   currentCategory,
-    //   categories,
-    //   firstCategories,
-    //   categorySelected,
-    //   adPosition
-    // })
-    // this.getGoodsList()
+    getGoodsList()
   }
+}
+
+const getGoodsList = async () => {
+  // if (this.data.categoryMod == 2) {
+  //   return
+  // }
+  // wx.showLoading({
+  //   title: '',
+  // })
+  // secondCategoryId
+  let categoryId = ''
+  if (secondCategoryId.value && secondCategoryId.value != '0') {
+    categoryId = secondCategoryId.value
+  } else if(categorySelected.id) {
+    console.log(2222, categorySelected.id)
+    categoryId = categorySelected.id
+  }
+  // https://www.yuque.com/apifm/nu0f75/wg5t98
+  const res = await WXAPI.goodsv2({
+    categoryId,
+    page: page.value,
+    pageSize: pageSize.value
+  })
+  // wx.hideLoading()
+  if (res.code == 700) {
+    if (page.value == 1) {
+      currentGoods.length = 0
+    } else {
+      // wx.showToast({
+      //   title: '没有更多了',
+      //   icon: 'none'
+      // })
+    }
+    return
+  }
+  if (res.code != 0) {
+    // wx.showToast({
+    //   title: res.msg,
+    //   icon: 'none'
+    // })
+    return
+  }
+  if (page.value == 1) {
+    Object.assign(currentGoods, res.data.result)
+  } else {
+    currentGoods.push(...res.data.result)
+  }
+}
+
+const onCategoryClick = async (e: number) => { // TODO: e的type是什么
+  //@ts-ignore
+  const idx = e
+  if (idx == activeCategory.value) {
+    scrolltop.value = 0
+    return
+  }
+  Object.assign(categorySelected, firstCategories[idx])
+  page.value = 1
+  secondCategoryId.value = ''
+  activeCategory.value = idx
+  currentGoods.length = 0
+  getGoodsList();
 }
 
 onMounted(() => {
@@ -70,41 +123,23 @@ onMounted(() => {
 <template>
   <main>
     <van-search v-model="searchValue" placeholder="请输入搜索关键词" />
-    <van-row style="height: calc(100vh - 120px);" justify="space-between">
-      <van-col class="category-col" span="6">
-        <van-sidebar v-model="currentCategory">
-          <van-sidebar-item  v-for="category in firstCategories" :key="category.id"  :title="category.name" />
+    <van-row  justify="space-between">
+      <van-col class="category-col left" span="6">
+        <van-sidebar v-model="activeCategory">
+          <!-- 这里$event就是index，好像传递不了事件对象 -->
+          <van-sidebar-item @click="onCategoryClick" :data-idx="index"  v-for="(category, index) in firstCategories" :key="category.id"  :title="category.name" />
         </van-sidebar>
       </van-col>
-      <van-col class="product-col" span="16">
+      <van-col class="product-col right" span="16">
+        <van-empty v-if="!currentGoods" description="暂无商品" />
         <van-card
+          v-for="item in currentGoods"
+          :key="item.id"
           num="1"
-          price="2.00"
-          desc="描述信息"
-          title="商品标题"
-          thumb="https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg"
-        >
-          <template #footer>
-            <van-button size="mini">下单</van-button>
-          </template>
-        </van-card>
-        <van-card
-          num="1"
-          price="2.00"
-          desc="描述信息"
-          title="商品标题"
-          thumb="https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg"
-        >
-          <template #footer>
-            <van-button size="mini">下单</van-button>
-          </template>
-        </van-card>
-        <van-card
-          num="1"
-          price="2.00"
-          desc="描述信息"
-          title="商品标题"
-          thumb="https://fastly.jsdelivr.net/npm/@vant/assets/ipad.jpeg"
+          :price="item.minPrice"
+          :desc="item.numberSells ? '已售' + item.numberSells : ''"
+          :title="item.name"
+          :thumb="item.pic"
         >
           <template #footer>
             <van-button size="mini">下单</van-button>
@@ -133,5 +168,9 @@ main {
   41.8px 41.8px 33.4px rgba(0, 0, 0, 0.05),
   100px 100px 80px rgba(0, 0, 0, 0.07)
 ;
+}
+.left, .right {
+  height: calc(100vh - 120px);
+  overflow: auto;
 }
 </style>
