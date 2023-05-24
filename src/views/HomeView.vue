@@ -7,7 +7,6 @@ const router = useRouter()
 
 const $wxapi: any = inject('$wxapi')
 const WXAPI = $wxapi
-console.log($wxapi)
 
 const searchValue = ref('')
 const activeCategory = ref<number>(0)
@@ -142,7 +141,7 @@ onMounted(() => {
           :thumb="item.pic"
         >
           <template #footer>
-            <van-button size="mini">下单</van-button>
+            <van-button size="mini" @click="router.push('/to-pay-order')">下单</van-button>
           </template>
         </van-card>
       </van-col>
