@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Tabbar from '@/components/Tabbar.vue'  // TODO:不加后缀没识别
+import Topbar from '@/components/Topbar.vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter()
@@ -12,6 +13,7 @@ const gotoApply = () => {
 
 <template>
   <div class="mine">
+    <Topbar title="会员中心" :show-back="false" />
     <div class="header-box">
       <div class="header-box-left">
         <div class="avatar"></div>
@@ -41,7 +43,10 @@ const gotoApply = () => {
     </div>
     <div class="space"></div>
     <van-cell-group title="三级分销">
-      <van-cell title="成为分销商" :is-link="true" @click="gotoApply" />
+      <van-cell title="成为分销商" :is-link="true" url="/apply" />
+    </van-cell-group>
+    <van-cell-group title="其他功能">
+      <van-cell title="系统设置" is-link url="settings" />
     </van-cell-group>
   </div>
   <Tabbar />

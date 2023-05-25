@@ -6,9 +6,20 @@
 
 /************************************************
 *                                               *
-*                 微信公众号 wxsdk                *
+*                 微信公众号 jssdk                *
 *                                               *
 ************************************************/
+
+/**
+ * jssdk操作步骤
+ * 一：“公众号设置”的“功能设置”里填写“JS接口安全域名”
+ * 二：引入js文件
+ * 三：通过config接口注入权限验证配置
+ * 四：通过ready接口处理成功验证
+ * 五：通过error接口处理失败验证
+ * https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html
+ */
+
 type MiniProgramType = {
   /**
    * 
@@ -23,7 +34,7 @@ type MiniProgramType = {
   redirectTo: (e: any) => void
   switchTab: (e: any) => void
 }
-type AddCardType = {
+type AddCardType = {    // TODO: extends公共的类型比如success，fail，complete,cancel
   cardList: [],
   success?: (e: object) => object
 }
@@ -306,3 +317,7 @@ declare module 'weixin-js-sdk' {
   }
   export = jssdk
 }
+// 这样以后，在组件中未导入wx，使用wx变量不会报红；但是微信公众号网页开发应该是要导入wx的
+// declare var wx: {
+
+// }

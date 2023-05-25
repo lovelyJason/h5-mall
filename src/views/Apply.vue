@@ -1,12 +1,48 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import Topbar from '@/components/Topbar.vue'
+import wx from 'weixin-js-sdk';
 
 const applyStatus = ref(-1)
 const setting: Record<'canBuy' | 'price', any> = reactive({
   canBuy: true,
-  price: 200
+  price: 3
 })
+
+// const buy = async () => {
+//   const token = wx.getStorageSync('token')
+//   let res = await WXAPI.userAmount(token)
+//   if (res.code != 0) {
+//     wx.showToast({
+//       title: res.msg,
+//       icon: 'none'
+//     })
+//     return
+//   }
+//   if (res.data.balance >= this.data.setting.price) {
+//     // 余额足够
+//     res = await WXAPI.fxBuy(token)
+//     if (res.code != 0) {
+//       wx.showToast({
+//         title: res.msg,
+//         icon: 'none'
+//       })
+//       return
+//     }
+//     wx.showToast({
+//       title: '升级成功',
+//     })
+//     setTimeout(() => {
+//       wx.redirectTo({
+//         url: '/packageFx/pages/index/index',
+//       })
+//     }, 1000);
+//   } else {
+//     let price = this.data.setting.price - res.data.balance
+//     price = price.toFixed(2)
+//     wxpay.wxpay('fxsBuy', price, 0, "/packageFx/pages/index/index");
+//   }
+// }
 
 </script>
 

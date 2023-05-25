@@ -15,7 +15,7 @@ import wxShare from '@/utils/wxShare'
 
 const app = createApp(App)
 
-WEBAPI.init('wxapi')  // 设置专属域名
+WEBAPI.init('jasonhuang')  // 设置专属域名
 app.provide('$wxapi', WEBAPI);
 app.provide('wxShare', wxShare);
 
