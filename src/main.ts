@@ -11,12 +11,14 @@ import App from './App.vue'
 import router from './router'
 
 import WEBAPI from 'apifm-webapi'
+import wx from 'weixin-js-sdk';
 import wxShare from '@/utils/wxShare'
 
 const app = createApp(App)
 
 WEBAPI.init('jasonhuang')  // 设置专属域名
 app.provide('$wxapi', WEBAPI);
+app.provide('wx', wx);
 app.provide('wxShare', wxShare);
 
 app.use(Button)

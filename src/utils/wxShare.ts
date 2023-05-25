@@ -2,7 +2,6 @@
 import WEBAPI from 'apifm-webapi'
 import wx from 'weixin-js-sdk';
 
-console.log(wx)
 // wx.checkJsApi()
 //存储各个链接的签名信息
 const signMap = new Map(); 
@@ -68,7 +67,7 @@ const wxShare = {
 		var postData = {
 			url: authUrl
 		}
-		const res = await WEBAPI.jssdkSign('/wxapi/wx/jssdk/sign', 'post', postData)
+		const res = await WEBAPI.jssdkSign('/jasonhuang/wx/jssdk/sign', 'post', postData)
 		if (res.code == 0) {
 			//分享链接授权签名信息
 			const sign = res.data;

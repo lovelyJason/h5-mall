@@ -6,6 +6,11 @@
 *                 api工厂  API                *
 *                                               *
 ************************************************/
+
+export interface ApifmResponse {
+  code: number;
+  data: any
+}
 declare module 'apifm-webapi' {
   namespace MyLib {
     function init2(a: string, b: string): void
@@ -15,7 +20,7 @@ declare module 'apifm-webapi' {
      * @param url 当前url，可通过location.href获取
      * @param token 登录接口返回的token
      */
-    function jssdkSign(b: string, token?: string): void
+    function jssdkSign(b: string, token?: string): ApifmResponse
   }
   export = MyLib
 }

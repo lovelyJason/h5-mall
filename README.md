@@ -1,8 +1,12 @@
 # 微信公众号网页开发步骤
 
 以下接口有微信的api请求形式和api工厂的sdk apifm-webapi调用形式；另外下文的access_token与基础支持的access_token不同
+只是公众号的网页开发，不涉及微信公众号的其他接口
 
 ## 网页授权
+
+场景：如果用户在微信客户端中访问第三方网页，公众号可以通过微信网页授权机制，来获取用户基本信息，进而实现业务逻辑。
+
 
 首先要在公众后台增加回调域名，现在只有认证的服务号和测试号才能有权限调用这个功能，个人订阅号，个人订阅号未认证，未认证服务号都不能调用。在测试公众号的网页服务---网页账号---网页授权获取用户基本信息，修改回调页面域名
 
@@ -28,14 +32,15 @@
 
 > https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx807d86fb6b3d4fd2&redirect_uri=http%3A%2F%2Fdevelopers.weixin.qq.com&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect
 
+前者是静默授权自动跳到回调页，后者需要用户手动同意授权
 
 尤其注意：由于授权操作安全等级较高，所以在发起授权请求时，微信会对授权链接做正则强匹配校验，如果链接的参数顺序不对，授权页面将无法正常访问
 
-如果用户同意授权，页面将跳转至 redirect_uri/?code=CODE&state=STATE。
+如果用户同意授权，页面将跳转至 `{redirect_uri}/?code=CODE&state=STATE`。
 
 #### 通过code换取网页授权access_token
 
-这里的access_token同普通的access_token不一样，只能调用jssdk中的接口。如果网页授权的作用域为snsapi_base，则本步骤中获取到网页授权access_token的同时，也获取到了openid，snsapi_base式的网页授权流程即到此为止。
+这里的access_token同普通的access_token不一样，只能调用jssdk中的接口。如果网页授权的作用域为snsapi_base，则本步骤中获取到网页授权access_token的同时，也获取到了openid，snsapi_base式的网页授权流程即到此为止。该access_token过期时间同样是7200s
 
 > https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
 
@@ -52,7 +57,7 @@
   "access_token":"ACCESS_TOKEN",
   "expires_in":7200,
   "refresh_token":"REFRESH_TOKEN",
-  "openid":"OPENID",
+  "openid":"OPENID",  // 用户唯一标识
   "scope":"SCOPE",
   "is_snapshotuser": 1,
   "unionid": "UNIONID"
@@ -61,9 +66,8 @@
 
 使用sdk:
 ```javascript
-WXAPI.wxmpAuth({
-    code: 0
-})
+WXAPI.wxmpAuth({code: 'url中的code参数'})
+// 返回data: openid, token, uid
 ```
 
 #### 拉取用户信息
@@ -107,7 +111,11 @@ WXAPI.wxmpAuth({
 使用sdk：
 
 ```javascript
-WXAPI.userWxinfo(token) // token 当前用户登陆凭证?应该是网页授权返回的token吧
+WXAPI.userWxinfo(token) // token 当前用户登陆凭证?应该是网页授权返回的token吧, 
+// 返回userId == 下面接口的base.id（后台里的用户编号）, openId
+
+WXAPI.userDetail(token) // 这个是拉去的后台里面的用户信息；用户首次访问绑定过appId的公众号，会自动注册为用户
+// 返回base.id, base.nick，base.userId != base.id
 ```
 ```json
 {
@@ -122,7 +130,7 @@ WXAPI.userWxinfo(token) // token 当前用户登陆凭证?应该是网页授权�
 
 #### 一些其他接口
 
-- 检验授权凭证access_token是否有效
+- 检验授权凭证access_token是否有效，需要传入access_token和openid
 
 > http：GET（请使用https协议）：
 
@@ -131,3 +139,47 @@ WXAPI.userWxinfo(token) // token 当前用户登陆凭证?应该是网页授权�
 ```javascript
 WXAPI.checkToken(token)
 ```
+
+## js sdk
+
+通过使用微信JS-SDK，网页开发者可借助微信高效地使用拍照、选图、语音、位置等手机系统的能力，同时可以直接使用微信分享、扫一扫、卡券、支付等微信特有的能力，为微信用户提供更优质的网页体验。
+
+使用步骤
+
+1. 公众号设置 --- 功能设置，填写js安全域名
+2. 引入js，暴漏全局变量wx
+3. 调用wx.config，每个页面必须注入配置信息才能调用接口
+4. 通过wx.ready处理成功验证
+
+wx.config其中涉及到加密，加密需要在后端执行
+
+```javascript
+wx.config({
+  debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+  appId: '', // 必填，公众号的唯一标识
+  timestamp: null, // 必填，生成签名的时间戳
+  nonceStr: '', // 必填，生成签名的随机串
+  signature: '',// 必填，签名
+  jsApiList: [] // 必填，需要使用的JS接口列表
+});
+```
+
+如果使用api工厂的sdk，则
+
+```typescript
+type SignType = {
+  appid: string // 小写吗？
+  timestamp: number,
+  noncestr: string,
+  sign: string
+}
+
+const res = await WEBAPI.jssdkSign('/jasonhuang/wx/jssdk/sign', 'post', postData)
+const { code, data: SignType } = res
+```
+
+这样就可以调用wx js sdk的所有接口了，当然前提是你的公众号符号接口的调用资质
+
+## web开发者工具
+
+使用注意事项，在打开授权链接时，如果成功授权，则会跳到最终页面带上code参数，code只能使用一次,但是access_token有两个小时使用期，可以先缓存起来
