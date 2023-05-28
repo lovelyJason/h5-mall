@@ -46,6 +46,26 @@ const router = createRouter({
       path: '/settings',
       name: 'settings',
       component: () => import('../views/Settings.vue')
+    },
+    {
+      path: '/settings/aboutus',
+      name: 'aboutus',
+      component: () => import('../views/Aboutus.vue')
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('../views/Register.vue')
+    },
+    {
+      path: '/apply/form',
+      name: 'applyForm',
+      component: () => import('../views/ApplyForm.vue')
+    },
+    {
+      path: '/invite',
+      name: 'invite',
+      component: () => import('../views/Invite.vue')
     }
   ]
 })

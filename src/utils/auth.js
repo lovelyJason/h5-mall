@@ -1,4 +1,4 @@
-import WXAPI from 'apifm-webapi'
+import WEBAPI from 'apifm-webapi'
 
 // 检测登录状态，返回 true / false
 async function checkHasLogined() {
@@ -11,7 +11,8 @@ async function checkHasLogined() {
   //   localStorage.removeItem('token')
   //   return false
   // }
-  const checkTokenRes = await WXAPI.checkToken(token)
+  const checkTokenRes = await WEBAPI.checkToken(token)
+  console.log(checkTokenRes)
   if (checkTokenRes.code != 0) {
     localStorage.removeItem('token')
     return false
@@ -25,14 +26,14 @@ async function authorize() {
       success: function (res) {
         const code = res.code
         let referrer = '' // 推荐人
-        let referrer_storge = wx.getStorageSync('referrer');
+        let referrer_storge = wx.getStorage('referrer');
         if (referrer_storge) {
           referrer = referrer_storge;
         }
         // 下面开始调用注册接口
         const extConfigSync = wx.getExtConfigSync()
         if (extConfigSync.subDomain) {
-          WXAPI.wxappServiceAuthorize({
+          WEBAPI.wxappServiceAuthorize({
             code: code,
             referrer: referrer
           }).then(function (res) {
@@ -49,7 +50,7 @@ async function authorize() {
             }
           })
         } else {
-          WXAPI.authorize({
+          WEBAPI.authorize({
             code: code,
             referrer: referrer
           }).then(function (res) {

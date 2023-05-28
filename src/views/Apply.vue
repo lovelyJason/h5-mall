@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import Topbar from '@/components/Topbar.vue'
+import { useRouter } from 'vue-router';
 import wx from 'weixin-js-sdk';
+
+const router = useRouter()
 
 const applyStatus = ref(-1)
 const setting: Record<'canBuy' | 'price', any> = reactive({
@@ -9,9 +12,13 @@ const setting: Record<'canBuy' | 'price', any> = reactive({
   price: 3
 })
 
+const goForm = () => {
+  router.push('/apply/form')
+}
+
 // const buy = async () => {
 //   const token = wx.getStorageSync('token')
-//   let res = await WXAPI.userAmount(token)
+//   let res = await WEBAPI.userAmount(token)
 //   if (res.code != 0) {
 //     wx.showToast({
 //       title: res.msg,
@@ -21,7 +28,7 @@ const setting: Record<'canBuy' | 'price', any> = reactive({
 //   }
 //   if (res.data.balance >= this.data.setting.price) {
 //     // 余额足够
-//     res = await WXAPI.fxBuy(token)
+//     res = await WEBAPI.fxBuy(token)
 //     if (res.code != 0) {
 //       wx.showToast({
 //         title: res.msg,
@@ -52,11 +59,11 @@ const setting: Record<'canBuy' | 'price', any> = reactive({
     <div class="noApply" v-if="applyStatus == -1">
       <van-empty description="诚邀您成为分销商" />
       <div class="block-btn">
-        <van-button type="primary" block round bind:click="goForm">免费申请 等待管理员审核</van-button>
+        <van-button type="primary" block round @click="goForm">免费申请 等待管理员审核</van-button>
       </div>
-      <div v-if="setting.canBuy" class="block-btn">
+      <!-- <div v-if="setting.canBuy" class="block-btn">
         <van-button type="warning" block round bind:click="buy">直接支付{{ setting.price }}元，立即免审开通</van-button>
-      </div>
+      </div> -->
     </div>
   
     <div class='noApply' v-if="applyStatus == 0">

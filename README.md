@@ -66,7 +66,7 @@
 
 使用sdk:
 ```javascript
-WXAPI.wxmpAuth({code: 'url中的code参数'})
+WEBAPI.wxmpAuth({code: 'url中的code参数'})
 // 返回data: openid, token, uid
 ```
 
@@ -111,10 +111,10 @@ WXAPI.wxmpAuth({code: 'url中的code参数'})
 使用sdk：
 
 ```javascript
-WXAPI.userWxinfo(token) // token 当前用户登陆凭证?应该是网页授权返回的token吧, 
+WEBAPI.userWxinfo(token) // token 当前用户登陆凭证?应该是网页授权返回的token吧, 
 // 返回userId == 下面接口的base.id（后台里的用户编号）, openId
 
-WXAPI.userDetail(token) // 这个是拉去的后台里面的用户信息；用户首次访问绑定过appId的公众号，会自动注册为用户
+WEBAPI.userDetail(token) // 这个是拉去的后台里面的用户信息；用户首次访问绑定过appId的公众号，会自动注册为用户
 // 返回base.id, base.nick，base.userId != base.id
 ```
 ```json
@@ -137,7 +137,7 @@ WXAPI.userDetail(token) // 这个是拉去的后台里面的用户信息；用�
 > https://api.weixin.qq.com/sns/auth?access_token=ACCESS_TOKEN&openid=OPENID
 
 ```javascript
-WXAPI.checkToken(token)
+WEBAPI.checkToken(token)
 ```
 
 ## js sdk
@@ -183,3 +183,7 @@ const { code, data: SignType } = res
 ## web开发者工具
 
 使用注意事项，在打开授权链接时，如果成功授权，则会跳到最终页面带上code参数，code只能使用一次,但是access_token有两个小时使用期，可以先缓存起来
+
+## 一些变更
+
+WEBAPI.goodsDetail，即shop/goods/detail接口入参少了token参数

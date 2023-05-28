@@ -3,10 +3,19 @@ import Tabbar from '@/components/Tabbar.vue'  // TODO:不加后缀没识别
 import { ref, reactive, onMounted, inject, toRefs } from 'vue'
 import { useRouter } from 'vue-router';
 
+export interface GoodsListReq {
+  categoryId?: string
+  page?: string
+  pageSize?: string
+  nameLike?: string // 商品标题模糊搜索
+  tagsLike?: string
+  k?: string // 分词联想
+}
+
 const router = useRouter()
 
-const $wxapi: any = inject('$wxapi')
-const WXAPI = $wxapi
+const $WEBAPI: any = inject('$WEBAPI')
+const WEBAPI = $WEBAPI
 
 const searchValue = ref('')
 const activeCategory = ref<number>(0)
@@ -26,7 +35,7 @@ const categories = async () => {
   // wx.showLoading({
   //   title: '',
   // })
-  const res = await $wxapi.goodsCategory()
+  const res = await $WEBAPI.goodsCategory()
   // wx.hideLoading()
   if (res.code == 0) {
     const categories = res.data.filter((ele: any) => {
@@ -51,7 +60,7 @@ const categories = async () => {
   }
 }
 
-const getGoodsList = async () => {
+const getGoodsList = async (req?: any) => {
   // if (this.data.categoryMod == 2) {
   //   return
   // }
@@ -63,14 +72,14 @@ const getGoodsList = async () => {
   if (secondCategoryId.value && secondCategoryId.value != '0') {
     categoryId = secondCategoryId.value
   } else if(categorySelected.id) {
-    console.log(2222, categorySelected.id)
     categoryId = categorySelected.id
   }
   // https://www.yuque.com/apifm/nu0f75/wg5t98
-  const res = await WXAPI.goodsv2({
+  const res = await WEBAPI.goodsv2({
     categoryId,
     page: page.value,
-    pageSize: pageSize.value
+    pageSize: pageSize.value,
+    ...req
   })
   // wx.hideLoading()
   if (res.code == 700) {
@@ -98,6 +107,12 @@ const getGoodsList = async () => {
   }
 }
 
+const resetGoodsList = () => {
+  page.value = 1
+  secondCategoryId.value = ''
+  currentGoods.length = 0
+}
+
 const onCategoryClick = async (e: number) => { // TODO: e的type是什么
   //@ts-ignore
   const idx = e
@@ -105,12 +120,24 @@ const onCategoryClick = async (e: number) => { // TODO: e的type是什么
     scrolltop.value = 0
     return
   }
+  resetGoodsList()
   Object.assign(categorySelected, firstCategories[idx])
-  page.value = 1
-  secondCategoryId.value = ''
   activeCategory.value = idx
-  currentGoods.length = 0
-  getGoodsList();
+
+  getGoodsList({ k: searchValue.value });
+}
+
+const gotoOrderPage = (id: number | string) => {
+  router.push('/to-pay-order?id=' + id)
+}
+
+const onSearchClear = () => {
+  getGoodsList()
+}
+
+const searchGoodes = () => {
+  // resetGoodsList()
+  getGoodsList({k: searchValue.value})
 }
 
 onMounted(() => {
@@ -121,7 +148,7 @@ onMounted(() => {
 
 <template>
   <main>
-    <van-search v-model="searchValue" placeholder="请输入搜索关键词" />
+    <van-search @clear="onSearchClear" clearable @search="searchGoodes" v-model="searchValue" placeholder="请输入搜索关键词" />
     <van-row  justify="space-between">
       <van-col class="category-col left" span="6">
         <van-sidebar v-model="activeCategory">
@@ -141,7 +168,7 @@ onMounted(() => {
           :thumb="item.pic"
         >
           <template #footer>
-            <van-button size="mini" @click="router.push('/to-pay-order')">下单</van-button>
+            <van-button size="mini" @click="gotoOrderPage(item.id)">下单</van-button>
           </template>
         </van-card>
       </van-col>
@@ -153,7 +180,7 @@ onMounted(() => {
 <style scoped>
 main {
   /* background-color: #ccc; */
-  padding: 1rem;
+  padding: 1rem 0.8rem 0;
 }
 .category-col, .product-col {
   /* background-color: #fff; */

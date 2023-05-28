@@ -64,10 +64,10 @@ const wxShare = {
     //从服务器获取某分享链接的签名信息，并存储起来
 	async wxShareAuth(authUrl: string) {
         //此处我使用的是自己封装的网络请求方法
-		var postData = {
-			url: authUrl
-		}
-		const res = await WEBAPI.jssdkSign('/jasonhuang/wx/jssdk/sign', 'post', postData)
+		// var postData = {
+		// 	url: authUrl
+		// }
+		const res = await WEBAPI.jssdkSign('/wx/jssdk/sign', authUrl)
 		if (res.code == 0) {
 			//分享链接授权签名信息
 			const sign = res.data;

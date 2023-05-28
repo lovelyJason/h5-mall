@@ -1,68 +1,86 @@
 <script setup lang="ts">
 import Tabbar from '@/components/Tabbar.vue'  // TODO:不加后缀没识别
 import Topbar from '@/components/Topbar.vue';
-import { reactive, inject, onMounted } from 'vue'
+import { ref, reactive, inject, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
-import AUTH from '@/utils/auth.js'
 import { showSuccessToast, showFailToast, showToast } from 'vant';
+import { useUserStore } from '@/stores/user';
 
-const $wxapi: any = inject('$wxapi')
+const $WEBAPI: any = inject('$WEBAPI')
 const wx: any = inject('wx')
-const WXAPI = $wxapi
+const WEBAPI = $WEBAPI
 
 const router = useRouter()
 const route = router.currentRoute.value
 
-const userData = reactive({
-  apiUserInfoMap: {},
-  userMobile: null,
-  nick: '',
-  isAdmin: false,
-  memberChecked: true,
-  base: {
-    id: 0
-  }
+const amountInfo = reactive<any>({})
+const nickShow = ref(false)
+const nick = ref('')
+const config = reactive<any>({
+  order_hx_uids: '',
+  cps_open: '',
+  recycle_open: '',
+  show_3_seller: '',
+  show_quan_exchange_score: '',
+  show_score_exchange_growth: '',
+  show_score_sign: '',
+  fx_type: ''
 })
+
+const user = useUserStore()
 
 const gotoApply = () => {
   router.push('/apply')
 }
 
-const getUserApiInfo = async () => {
-  const wxcode = route.query.code
-  const authIno = await WXAPI.wxmpAuth({code: wxcode})
-  if(authIno.code != 0) return
-  const token = authIno.data.token
-  localStorage.setItem('token', token)
-  const res = await WXAPI.userDetail(token)
-  // const userWxinfo = await WXAPI.userWxinfo(token) // 只返回openid,userId
+const editNick = async () => {
+  if(!nick.value) {
+    showToast('请填写昵称')
+    return
+  }
+  const postData = {
+    token: wx.getStorage('token'),
+    nick: nick.value
+  }
+  const res = await WEBAPI.modifyUserInfo(postData)
+  if (res.code != 0) {
+    showToast(res.msg)
+    return
+  }
+  showSuccessToast('设置成功')
+}
+
+const userAmount = async () => {
+  const res = await WEBAPI.userAmount(user.getStorage('token'))
   if (res.code == 0) {
-    userData.base = res.data.base
-    userData.apiUserInfoMap = res.data
-    if (res.data.base.mobile) {
-      userData.userMobile = res.data.base.mobile
-    }
-    userData.nick = res.data.base.nick
-    // const adminUserIds = wx.getStorageSync('adminUserIds')
-    // if (adminUserIds && adminUserIds.indexOf(res.data.base.id) != -1) {
-    //   userData.isAdmin = true
-    // }
-    if (res.data.peisongMember && res.data.peisongMember.status == 1) {
-      userData.memberChecked = false
-    } else {
-      userData.memberChecked = true
-    }
+    Object.assign(amountInfo, res.data)
+    return res.data
   }
 }
 
+const readConfigVal = () => {
+  config.order_hx_uids = user.getStorage('order_hx_uids'),
+  config.cps_open = user.getStorage('cps_open'),
+  config.recycle_open = user.getStorage('recycle_open'),
+  config.show_3_seller = user.getStorage('show_3_seller'),
+  config.show_quan_exchange_score = user.getStorage('show_quan_exchange_score'),
+  config.show_score_exchange_growth = user.getStorage('show_score_exchange_growth'),
+  config.show_score_sign = user.getStorage('show_score_sign'),
+  config.fx_type = user.getStorage('fx_type')
+}
+
 onMounted(() => {
-  AUTH.checkHasLogined().then((isLogined: boolean) => {
-    if(isLogined) {
-      getUserApiInfo()
+  readConfigVal()
+  user.checkHasLogined().then(async (isLogined: boolean) => {
+    if (isLogined) {
+      Promise.all([user.getUserApiInfo(), userAmount()])
     } else {
+      user.getNewToken({ code: route.query.code as string })
+      // TODO:调用授权后再获取页面数据
       showFailToast({
-        message: '登录失效，需要重新获取授权信息'
+        message: '登录失效，需要重新获取授权信息' // 只是网页授权登录
       })
+      // TODO:跳到微信中转页静默授权
     }
   })
 })
@@ -74,43 +92,61 @@ onMounted(() => {
     <Topbar title="会员中心" :show-back="false" />
     <div class="header-box">
       <div class="header-box-left">
-        <div class="avatar"></div>
+        <div class="avatar" :style="{backgroundImage: `url(${user.userData.base.avatarUrl})`}"></div>
         <div class="r">
-          <div class="uid">用户ID: {{ userData.base.id }}</div>
-          <div class="nick">点击设置昵称</div>
+          <div class="uid">用户ID: {{ user.userData.base.id }}</div>
+          <div class="nick" @click="nickShow = true">{{ user.userData.base.nick ? user.userData.base.nick : '点击设置昵称' }}</div>
         </div>
       </div>
     </div>
     <div class="asset">
       <div class="item">
-        <div class="amount">0.00</div>
+        <div class="amount">{{ amountInfo.balance }}</div>
         <div>余额</div>
       </div>
       <div class="item right">
-        <div class="amount">0.00</div>
+        <div class="amount">{{ amountInfo.freeze }}</div>
         <div>冻结</div>
       </div>
       <div class="item right">
-        <div class="amount">1</div>
+        <div class="amount">{{ amountInfo.score }}</div>
         <div>积分</div>
       </div>
       <div class="item right">
-        <div class="amount">0</div>
+        <div class="amount">{{ amountInfo.growth }}</div>
         <div>成长值</div>
       </div>
     </div>
     <div class="space"></div>
-    <van-cell-group title="三级分销">
-      <van-cell title="成为分销商" :is-link="true" url="/apply" />
+    <van-cell v-if="config.fx_type == 'hehuoren'" title="分销中心" is-link />
+    <van-cell-group v-else-if="config.show_3_seller == 1" title="三级分销">
+      <van-cell v-if="!user.userData.base.isSeller" title="成为分销商" :is-link="true" @click="router.push('/apply')" />
+      <van-cell v-if="user.userData.base.isSeller" title="我的团队" is-link />
+      <van-cell v-if="user.userData.base.isSeller" title="推广订单" is-link url="/packageFx/pages/commisionLog/index" />
     </van-cell-group>
     <van-cell-group title="其他功能">
-      <van-cell title="系统设置" is-link url="settings" />
+      <van-cell title="个人信息" />
+      <van-cell title="系统设置" is-link @click="router.push('/settings')" />
     </van-cell-group>
   </div>
   <Tabbar />
+  <van-dialog
+    use-slot
+    title="修改昵称"
+    v-model:show="nickShow"
+    show-cancel-button
+    @confirm="editNick"
+  >
+    <van-field
+      v-model="nick"
+      placeholder="请输入昵称"
+      size="large"
+      clearable
+    />
+  </van-dialog>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .mine {
   height: 100vh;
   background-color: #fff;
@@ -131,7 +167,8 @@ onMounted(() => {
   height: 16vw;
   margin: 2.8vw;
   border-radius: 50%;
-  background: url('https://cdn.qdovo.com/img/timg.jpeg') no-repeat center;
+  background-repeat: no-repeat;
+  background-position: center;
   background-size: cover;
 }
 .header-box .r {
@@ -143,13 +180,16 @@ onMounted(() => {
   border-top: 1px solid #eee;
   padding-top: 1.2vw;
   padding-bottom: 1.2vw;
+  .amount {
+    font-size: 15px;
+  }
 }
 .asset .item {
   flex: 1;
   display: flex;
   flex-direction: column;
   text-align: center;
-  font-size: 1.5vw;
+  font-size: 14px;
   line-height: 20px;
   color: #666;
 }
@@ -158,7 +198,7 @@ onMounted(() => {
 }
 .asset .item .amount {
   color: #333;
-  font-size: 2vw;
+  /* font-size: 2vw; */
   padding-bottom: 0.5vw;
 }
 .space {

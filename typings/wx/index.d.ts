@@ -314,6 +314,8 @@ declare module 'weixin-js-sdk' {
      * @param e
      */
     function uploadVoice(e: any): void
+    function setStorage(key: string, value: string): void
+    function getStorage(key: string): string | null | undefined
   }
   export = jssdk
 }
