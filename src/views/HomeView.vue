@@ -141,6 +141,7 @@ const searchGoodes = () => {
 }
 
 onMounted(() => {
+  // TODO: 携带inviter_id
   categories()
 })
 

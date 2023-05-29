@@ -27,7 +27,8 @@ export const useUserStore = defineStore('user', () => {
     // 邀请人的信息
     referrer: {
       avatarUrl: '',
-      nick: ''
+      nick: '',
+      uid: 0  // 用户uid就是编号
     }  
   })
 
@@ -77,6 +78,7 @@ export const useUserStore = defineStore('user', () => {
       userData.ext = res.data.ext
       userData.userLevel = res.data.userLevel
       userData.saleDistributionTeam = res.data.saleDistributionTeam
+      userData.referrer = res.data.referrer
       return userData
     } else {
       // TODO:可以跳到微信授权页再回来

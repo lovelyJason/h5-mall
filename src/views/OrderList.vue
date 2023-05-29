@@ -128,7 +128,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="order-list">
+  <van-empty v-if="orderList.length <= 0" description="暂无订单" />
+  <div v-else class="order-list">
     <div class="a-order">
       <div v-for="order in orderList" :key="order.id" class="order-item">
         <van-cell :title="order.orderNumber" :value="order.statusStr" size="large" />
@@ -153,9 +154,9 @@ onMounted(() => {
           <div class="btn active" :hidden="order.status == 0 || order.status == -1" :data-id="order.id" :data-amount='order.amountReal'>退换货</div>
         </div>
       </div>
-      <Tabbar />
     </div>
   </div>
+  <Tabbar />
   
 </template>
 

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, inject } from 'vue'
+import { ref, reactive, onMounted, inject, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { showLoadingToast, showToast, showFailToast, showConfirmDialog } from 'vant';
+import Clipboard from "clipboard";
 
+const btnCopy = new Clipboard("#copyUid");
 const router = useRouter()
 const route = router.currentRoute.value
 const user = useUserStore()
@@ -57,7 +59,7 @@ Date.prototype.format = function (content: any) {
 }
 
 const convertRpxToVw = (point: number) => {
-  return point / 750 * 2 * 100 + 'px'
+  return point / 750 * 100 + 'vw'
 }
 
 const adPosition = async () => {
@@ -90,9 +92,34 @@ const getAmount = () => {
   })
 }
 
+/**
+  * @params containerDom: 包裹待转化的DOM，
+  * 即本例中的 <div class="container" ref="containerDom">
+  */
+const makePoster = async (containerDom: HTMLElement | null | undefined) => {
+  // let posterUrl = '';
+  // if (!containerDom) {
+  //   console.error('containerDom为空: ');
+  //   return posterUrl;
+  // }
+ 
+  // // 设置配置项，可以在官方文档查
+  // const options = {
+  //   scale: window.devicePixelRatio, // 放大倍数，消除截图锯齿
+  //   width: gradesDom?.offsetWidth, // 生成的图片宽度，单位px
+  //   height: posterDom.offsetHeight + 60, // 生成的图片高度，单位px
+  //   backgroundColor: null, // 设置背景色，null表示透明。若不设置此项，默认是白色背景
+  // };
+  // try {
+  //   const canvas = await html2canvas(containerDom, options);
+  //   posterUrl = canvas.toDataURL('image/png');
+  // } catch (err) {
+  //   console.info('制作海报出错了:', err);
+  // }
+  // return posterUrl;
+}
+
 const showCanvas = (qrcode: string) => {
-  const _this = this
-  let ctx
   // wx.getImageInfo({
   //   src: qrcode,
   //   success: (res) => {
@@ -137,9 +164,8 @@ const fetchQrcode = () => {
   // })
 }
 const getApplyProcess = async () => {
-  const userDetail = await WEBAPI.userDetail(wx.getStorage('token'))
   WEBAPI.fxApplyProgress(wx.getStorage('token')).then((res: any) => {
-    let applyStatus = userDetail.data.base.isSeller ? 2 : -1
+    let applyStatus = user.userData.base.isSeller ? 2 : -1
     if (res.code == 2000) {
       return
     }
@@ -147,7 +173,7 @@ const getApplyProcess = async () => {
       data.applyStatus = applyStatus
     }
     if (res.code === 0) {
-      if (userDetail.data.base.isSeller) {
+      if (user.userData.base.isSeller) {
         applyStatus = 2
       } else {
         applyStatus = res.data.status
@@ -232,20 +258,33 @@ const handleUserInfo = async () => {
   }
 }
 
+const copyContent = (e: any) => {
+  showToast('已复制到剪切板')
+}
+
+const saveToMobile = () => {
+
+}
+
 onMounted(() => {
   adPosition()
   user.checkHasLogined().then(async (isLogined: boolean) => {
     if (isLogined) {
+      await user.getUserApiInfo()
+      console.log(user.userData)
+      handleUserInfo()
       getAmount()
       getApplyProcess()
-      await user.getUserApiInfo()
-      handleUserInfo()
     } else {
       showFailToast({
         message: '登录失效，需要重新获取授权信息'
       })
     }
   })
+})
+
+onBeforeUnmount(() => {
+  btnCopy.destroy()
 })
 
 </script>
@@ -257,7 +296,7 @@ onMounted(() => {
 
     <!-- 如果当前用户是分销商 -->
     <div v-if="user.userData.base && user.userData.base.isSeller">
-      <div class="tabTop" :style="{ 'margin-top': convertRpxToVw(-670) }">
+      <div class="tabTop" :style="{ 'margin-top': '-180px' }">
         <div class="header-box">
           <img class="avatar" :src="user.userData.base.avatarUrl" mode="aspectFill" />
           <div class="r">
@@ -314,8 +353,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
-      <div v-if="user.userData.referrer" class="tuan">
+      <div v-if="user.userData.referrer.uid" class="tuan">
         <div>我的邀请人</div>
         <div class="line2"></div>
         <div style="display: flex">
@@ -328,15 +366,27 @@ onMounted(() => {
               user.userData.referrer.nick }}</div>
         </div>
       </div>
-      <image v-if="data.fxIndexAdPos" :src="data.fxIndexAdPos" mode="widthFix" class="adpos"
-        :data-url="data.fxIndexAdPos.url" bindtap="goUrl"></image>
+      <img v-if="data.fxIndexAdPos" :src="data.fxIndexAdPos.val" mode="widthFix" class="adpos" :data-url="data.fxIndexAdPos.url" bindtap="goUrl" />
       <van-cell-group title="分销信息" custom-class="cell-class">
-        <van-field :value="user.userData.base.id" readonly center clearable label="我的邀请码" use-button-slot>
-          <van-button slot="button" size="small" type="primary" round bindtap="copyContent"
-            :data-id="user.userData.base.id">复制</van-button>
+        <van-field v-model="user.userData.base.id" readonly center clearable label="我的邀请码">
+          <template #button>
+            <van-button 
+              id="copyUid"
+              slot="button" 
+              size="small" 
+              type="primary" 
+              round 
+              bindtap="copyContent"
+              :data-id="user.userData.base.id"
+              :data-clipboard-text="user.userData.base.id"
+              @click="copyContent"
+            >
+            复制
+            </van-button>
+          </template>
         </van-field>
-        <van-cell title="我的团队" value="查看" is-link />
-        <van-cell title="推广订单" value="查看" is-link />
+        <van-cell title="我的团队" value="查看" is-link @click="router.push('/myusers')" />
+        <van-cell title="推广订单" value="查看" is-link @click="router.push('/commision-orderlist')" />
         <van-cell title="账单明细" value="查看" is-link />
       </van-cell-group>
 
@@ -366,7 +416,7 @@ onMounted(() => {
             <canvas class="canvas" :style="{ width: data.canvasHeight + 'px', height: data.canvasHeight + 'px' }"
               canvas-id="firstCanvas"></canvas>
           </div>
-          <div class="tzBtn" bindtap="saveToMobile" :style="{ 'margin-top': convertRpxToVw(10), background: '#F5D795', padding: `0 ${convertRpxToVw(16)}` }">
+          <div class="tzBtn" @click="saveToMobile" :style="{ 'margin-top': convertRpxToVw(10), background: '#F5D795', padding: `0 ${convertRpxToVw(16)}` }">
             保存到相册
           </div>
         </div>
@@ -375,7 +425,7 @@ onMounted(() => {
     </div>
 
     <!-- 还不是分销商 -->
-    <div v-if="user.userData.base && !user.userData.base.isSeller" class="tabTop" :style="{ 'margin-top': convertRpxToVw(-700) }">
+    <div v-if="user.userData.base && !user.userData.base.isSeller" class="tabTop" :style="{ 'margin-top': '192px' }">
       <div class="header-box">
         <image class="avatar" :src="user.userData.base.avatarUrl" mode="aspectFill"></image>
         <div class="r">
@@ -549,11 +599,10 @@ onMounted(() => {
 .tzBtn {
   width: convertRpxToVw(230);
   height: convertRpxToVw(70);
-  height: convertRpxToVw(70);
+  line-height: convertRpxToVw(70);
   margin: auto;
   border-radius: 28px;
   border: convertRpxToVw(2) solid #3F240A;
-  line-height: convertRpxToVw(56);
   right: 16px;
   text-align: center;
   font-size: 14px;
@@ -571,7 +620,7 @@ onMounted(() => {
 
 .tuan {
   margin-left: convertRpxToVw(20);
-  width: convertRpxToVw(630);
+  margin-right: convertRpxToVw(20);
   background: #FFFFFF;
   border-radius: convertRpxToVw(8);
   // padding: convertRpxToVw(40);
