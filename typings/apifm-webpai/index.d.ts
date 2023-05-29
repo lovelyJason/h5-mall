@@ -6,7 +6,6 @@
 *                 api工厂  API                *
 *                                               *
 ************************************************/
-
 interface ApifmResponse {
   code: number;
   data: any
@@ -105,28 +104,49 @@ declare module 'apifm-webapi' {
      * @param url 
      * @param data 
      */
-    function payVariableUrl(url: string, data: any): any
+    function payVariableUrl(url: string, data: any): ApifmResponse
     /**
      * 订单统计
      * @param token 登录凭证
      */
-    function orderStatistics(token: string): any
+    function orderStatistics(token: string): ApifmResponse
     /**
      * 获取订单列表
      * @param token 登录凭证
      */
-    function orderList(token: string): any
+    function orderList(token: string): ApifmResponse
     /**
      * 关闭订单
      * @param token 登录凭证
      * @param orderId 订单id
      */
-    function orderClose(token: string, orderId: string | number): any
+    function orderClose(token: string, orderId: string | number): ApifmResponse
     /**
      * 读取广告位
      * @param key key
      */
-    function adPosition(key: string): any
+    function adPosition(key: string): ApifmResponse
+    /**
+     * 
+     * @param token 登录凭证
+     * @param uid 用户编号，member里的uids
+     */
+    function userDetailSpreadUser(token: string, uid: string): ApifmResponse
+    /**
+     * 获取佣金记录
+     * @param data 
+     */
+    function fxCommisionLog(data: any): ApifmResponse
+    /**
+     * 申请成为分销商进度
+     * @param token 登录凭证
+     */
+    function fxApplyProgress(token: string): ApifmResponse
+    /**
+     * 无限生成小程序码
+     * @param token 
+     */
+    function wxaQrcode(token: string): ApifmResponse
   }
   export = ApifmWebapi
 }

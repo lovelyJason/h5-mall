@@ -61,7 +61,6 @@ const getMembers = async () => {
 }
 
 const tabChange = (e: any) => {
-  console.log(e)
   activeIndex.value = e
   page.value = 1
   getMembers()

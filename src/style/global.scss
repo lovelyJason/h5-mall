@@ -24,7 +24,7 @@
 @function convertRpxToVw($t, $isDouble: false) {
   $result: 0;
   @if $isDouble {
-    $result: calc($t / 750 * 100 / 2 * 1vw);
+    $result: calc($t / 750 * 100 * 2 * 1vw);
   } @else {
     $result: calc($t / 750 * 100 * 1vw);
   }

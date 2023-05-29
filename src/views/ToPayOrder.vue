@@ -395,6 +395,7 @@ form {
 
 .peisong-way {
   width: 100%;
+  height: 42px;
   background-color: #fff;
   margin-bottom: convertRpxToVw(20);
 
@@ -424,6 +425,13 @@ form {
   font-size: convertRpxToVw(28);
   color: #666;
   padding-right: convertRpxToVw(30);
+  height: 42px;
+  line-height: 42px;
+  display: flex;
+  align-items: center;
+  .van-cell {
+    height: 42px;
+  }
 }
 
 .peisong-way .liuyan {
@@ -449,8 +457,11 @@ form {
   color: #000;
 }
 
-.goods-info .row-box .right-text {
-  text-align: right;
+.goods-info .row-box {
+  .right-text {
+    text-align: right;
+    
+  }
 }
 
 .row-box .next {

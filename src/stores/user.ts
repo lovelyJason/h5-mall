@@ -9,12 +9,26 @@ export const useUserStore = defineStore('user', () => {
   const isLogined = ref(true)
   const userData = reactive({
     base: {
-      id: null,
+      id: 0,
       nick: '',
       referrer: '',// 邀请人
       isSeller: false,
       avatarUrl: ''
-    }
+    },
+    ext: {},
+    userLevel: {},
+    saleDistributionTeam: {
+      name: '',
+      leader: 0,
+      deputyLeader: 0,
+      standardSaleroom: '',
+      curSaleroom: ''
+    },
+    // 邀请人的信息
+    referrer: {
+      avatarUrl: '',
+      nick: ''
+    }  
   })
 
   async function checkHasLogined() {
@@ -60,6 +74,9 @@ export const useUserStore = defineStore('user', () => {
     // const userWxinfo = await WEBAPI.userWxinfo(token) // 只返回openid,userId
     if (res.code == 0) {
       userData.base = res.data.base
+      userData.ext = res.data.ext
+      userData.userLevel = res.data.userLevel
+      userData.saleDistributionTeam = res.data.saleDistributionTeam
       return userData
     } else {
       // TODO:可以跳到微信授权页再回来

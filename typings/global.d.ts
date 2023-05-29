@@ -1,5 +1,3 @@
-// declare module '@vue/runtime-core' {
-//   interface ComponentCustomProperties {
-//     $filters: any
-//   }
-// }
+interface Date {
+  format(str : string) : string
+}

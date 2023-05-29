@@ -17,8 +17,11 @@ const data = reactive<any>({
   }
 })
 
+console.log(WEBAPI)
+
 const userDetailSpreadUser = async () => {
   const uid = route.query.id
+  console.log(uid)
   const res = await WEBAPI.userDetailSpreadUser(wx.getStorage('token'), uid)
   if (res.code != 0) {
     showConfirmDialog({
@@ -45,7 +48,7 @@ onMounted(() => {
     <van-cell title="会员编号" :value="data.userInfoMap.base.id" />
     <van-cell title="手机号码" :value="data.userInfoMap.base.mobile" />
     <van-cell title="昵称" :value="data.userInfoMap.base.nick" />
-    <van-cell wx:if="data.userInfoMap.userLevel" title="等级" :value="data.userInfoMap.userLevel.name" />
+    <van-cell v-if="data.userInfoMap.userLevel" title="等级" :value="data.userInfoMap.userLevel.name" />
     <van-cell title="分销商">
       <view>
         <view v-if="!data.userInfoMap.base.isSeller">否</view>
