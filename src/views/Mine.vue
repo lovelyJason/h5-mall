@@ -121,7 +121,7 @@ onMounted(() => {
     <van-cell v-if="config.fx_type == 'hehuoren'" title="分销中心" is-link />
     <van-cell-group v-else-if="config.show_3_seller == 1" title="三级分销">
       <van-cell v-if="!user.userData.base.isSeller" title="成为分销商" :is-link="true" @click="router.push('/apply')" />
-      <van-cell v-if="user.userData.base.isSeller" title="我的团队" is-link />
+      <van-cell v-if="user.userData.base.isSeller" title="我的团队" is-link @click="router.push('/myusers')" />
       <van-cell v-if="user.userData.base.isSeller" title="推广订单" is-link url="/packageFx/pages/commisionLog/index" />
     </van-cell-group>
     <van-cell-group title="其他功能">

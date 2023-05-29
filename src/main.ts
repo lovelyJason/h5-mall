@@ -23,7 +23,9 @@ import {
   Field,
   SubmitBar,
   Dialog,
-  Divider
+  Divider,
+  Sticky,
+  Tag
 } from 'vant'
 // 2. 引入组件样式
 import 'vant/lib/index.css'
@@ -70,6 +72,8 @@ app.use(Field)
 app.use(SubmitBar)
 app.use(Dialog)
 app.use(Divider)
+app.use(Sticky)
+app.use(Tag)
 
 app.use(createPinia())
 app.use(router)

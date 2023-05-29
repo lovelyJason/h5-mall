@@ -66,6 +66,16 @@ const router = createRouter({
       path: '/invite',
       name: 'invite',
       component: () => import('../views/Invite.vue')
+    },
+    {
+      path: '/myusers',
+      name: 'myusers',
+      component: () => import('../views/MyUsers.vue')
+    },
+    {
+      path: '/myusers-detail',
+      name: 'myusers-detail',
+      component: () => import('../views/MyUsersDetail.vue')
     }
   ]
 })
