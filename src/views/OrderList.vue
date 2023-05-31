@@ -152,7 +152,7 @@ onMounted(() => {
           <div @click="cancelOrderClick" class="btn" :hidden="order.status == 0 ? false : true" :data-id="order.id">取消订单</div>
           <div @click="onPayClick" class="btn active" :hidden="order.status == 0 ? false : true" :data-id="order.id" :data-money="order.amountReal" :data-score="order.score">马上付款</div>
           <div v-if="order.status == 0 && sphpay_open == '1'" class="btn active" :data-id="order.id" :data-money="order.amountReal" :data-score="order.score">视频号支付</div>
-          <div class="btn active" :hidden="order.status == 0 || order.status == -1" :data-id="order.id" :data-amount='order.amountReal'>退换货</div>
+          <!-- <div class="btn active" :hidden="order.status == 0 || order.status == -1" :data-id="order.id" :data-amount='order.amountReal'>退换货</div> -->
         </div>
       </div>
     </div>

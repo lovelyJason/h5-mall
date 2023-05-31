@@ -3,7 +3,10 @@ import { RouterView } from 'vue-router'
 </script>
 
 <template>
-  <RouterView />
+  <!-- 他妈的这个库直接写在routerView上面有些bug，title切换不过来 -->
+  <div v-wechat-title="$route.meta.title">
+    <RouterView  />
+  </div>
 </template>
 
 <style scoped>

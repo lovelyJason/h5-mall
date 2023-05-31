@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router';
 // import AUTH from '@/utils/auth.js'
 import { useUserStore } from '@/stores/user';
 import { wxpay } from '@/utils/wxpay'
+// @ts-ignore
 import { areaList } from '@vant/area-data';
 
 interface GoodsItem {
@@ -46,16 +47,19 @@ const remark = ref<string>('')
 const amountInfo = ref<any>({})
 const btnLoading = ref<boolean>(false)
 const showArea = ref<boolean>(false)
+const areaCOde = ref<string>('')
+const areaSelectedText = ref<string>('')
 const preorderInfo = reactive<any>({
 })
 const data = reactive<any>({
   peisongType: 'kd',
   recipientInfo: {
-    name: '',
-    phone: '',
-    idCard: '',
-    detailedAddress: ''
-  }
+    linkMan: '',
+    mobile: '',
+    idcard: '',
+    address: ''
+  },
+  areaCodeList: []
 })
 let formInstance: any = null
 
@@ -77,6 +81,12 @@ const getGoodesDetail = async () => {
       return goodsDetail
     }
   }
+}
+
+const onAreaConfirm = (selectedValues: any) => {
+  console.log(selectedValues)
+  areaSelectedText.value = selectedValues.selectedOptions?.map((val: any) => val.text).join('，')
+  data.areaCodeList = selectedValues.selectedOptions?.map((val: any) => val.value)
 }
 
 const isNeedLogistics = computed(() => {
@@ -164,6 +174,13 @@ const createOrder = async (preorder: boolean) => {
   }
   if(isNeedLogistics) {
     postData.peisongType = data.peisongType
+    postData.provinceId = data.areaCodeList[0]
+    postData.cityId = data.areaCodeList[1]
+    postData.districtId = data.areaCodeList[2]
+    postData.address = data.recipientInfo.address
+    postData.linkMan = data.recipientInfo.linkMan
+    postData.mobile = data.recipientInfo.mobile
+    postData.idcard = data.recipientInfo.idcard
   }
 
   if (preorder) {
@@ -183,6 +200,8 @@ const createOrder = async (preorder: boolean) => {
       if(!preorder) {
         processAfterCreateOrder(res.data)
       }
+    } else {
+      showFailToast(res.msg)
     }
   } catch (error) {
     btnLoading.value = false
@@ -263,16 +282,16 @@ onMounted(() => {
                 </template>
               </van-cell>
               <van-field
-                v-model="data.recipientInfo.name"
-                name="name"
+                v-model="data.recipientInfo.linkMan"
+                name="linkMan"
                 required
                 label="姓名"
                 placeholder="请输入姓名"
                 :rules="[{ required: true, message: '请输入姓名' }, { pattern: /^[\u4e00-\u9fa5]{2,4}$/, message: '请输入正确格式姓名' }]"
               />
               <van-field
-                v-model="data.recipientInfo.phone"
-                name="phone"
+                v-model="data.recipientInfo.mobile"
+                name="mobile"
                 required
                 label="联系方式"
                 placeholder="请输入手机号"
@@ -280,27 +299,29 @@ onMounted(() => {
                 :rules="[{ required: true, message: '请输入手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '请输入正确格式手机号' }]"
               />
               <van-field
-                v-model="data.recipientInfo.idCard"
-                name="idCard"
+                v-model="data.recipientInfo.idcard"
+                name="idcard"
                 required
                 label="身份证号"
                 placeholder="请输入身份证号"
                 :rules="[{ required: true, message: '请输入身份证号' }]"
               />
-              <!-- <van-cell style="margin-left: 8px;" @click="showArea = !showArea" required title="收货地址" is-link>
-                <template #value>
-                  <span>请选择</span>
+              <van-cell class="area-cell"  @click="showArea = !showArea" title="收货地址" is-link error-message="111" :error="true">
+                <template  #value>
+                  <span v-if="!areaCOde">请选择</span>
+                  <span v-else>{{ areaSelectedText }}</span>
                   <van-popup
+                    required
                     v-model:show="showArea"
                     position="bottom"
                   >
-                    <van-area :area-list="areaList" />
+                    <van-area v-model="areaCOde" :area-list="areaList" @confirm="onAreaConfirm" />
                   </van-popup>
                 </template>
-              </van-cell> -->
+              </van-cell>
               <van-field
-                v-model="data.recipientInfo.detailedAddress"
-                name="detailedAddress"
+                v-model="data.recipientInfo.address"
+                name="address"
                 required
                 label="详细地址"
                 placeholder="请输入详细地址"
@@ -309,7 +330,8 @@ onMounted(() => {
             </van-cell-group>
           </van-form>
           <van-field
-            style="margin-left: 8px;"
+            v-model="remark"
+            style="padding-left: 24px;"
             label="备注"
             placeholder="如需备注请输入"
           />
@@ -647,6 +669,13 @@ form {
   .van-button {
     background-color: #07c160;
     border: none;
+  }
+}
+.area-cell {
+  &::before {
+    margin-right: 2px;
+    color: var(--van-field-required-mark-color);
+    content: "*";
   }
 }
 </style>

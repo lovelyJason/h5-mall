@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, inject, computed } from 'vue'
+import Topbar from '@/components/Topbar.vue'
 import { useRouter } from 'vue-router';
 import { showSuccessToast, showLoadingToast, showToast, showFailToast, showConfirmDialog } from 'vant';
 import { useUserStore } from '@/stores/user';
+import { goodsDetail } from 'apifm-webapi';
 
 const $WEBAPI: any = inject('$WEBAPI')
 const WEBAPI = $WEBAPI
@@ -22,7 +24,7 @@ const data = reactive<any>({
   },
   selectSizePrice: null,
   selectSizeOPrice: null,
-  hideShopPopup: null,
+  showShopPopup: false,
   hasMoreSelect: false,
   goodsDetailSkuShowType: null,
   buyNumber: 1,
@@ -101,6 +103,11 @@ const goodsAddition = async () => {
   }
 }
 
+// TODO:立即购买之前还有一些判断逻辑
+const gotoPayOrder = (id: string | number) => {
+  router.push('/to-pay-order?id=' + id)
+}
+
 onMounted(() => {
   // 商品id携带在query.id
   // 读取分享链接中的邀请人编号,但是如果之前已经被邀请过了还是不用再换绑了
@@ -131,177 +138,180 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container">
-    <van-sticky v-if="data.createTabs">
-      <div id="tabs" class="tabs-container">
-        <van-tabs sticky bind:click="onTabsChange" custom-class="" :active="data.active">
-          <van-tab v-for="item in data.tabs" :title="item.tabs_name" :name="item.tabs_name" />
-        </van-tabs>
-      </div>
-    </van-sticky>
-    <!-- 这是一段scroll-view -->
-    <div style="overflow: scroll" class="scroll-container" scroll-into-view="{{toView}}" scroll-y="true" scroll-with-animation="true"
-      bindscroll="bindscroll">
-      <div class="swiper-container" id="swiper-container">
-        <!-- 这是一段轮播图 -->
-
-        <van-swipe class="swiper_box" :autoplay="3000" indicator-color="white">
-          <van-swipe-item v-for="item in data.goodsDetail.pics" :key="item.id">
-            <img :src="item.pic" class="slide-image" mode="aspectFill" lazy-load="true" bindtap="previewImage2"
-              :data-url="item.pic" />
-          </van-swipe-item>
-        </van-swipe>
-        <!-- <swiper class="swiper_box" indicator-dots="true" indicator-active-color="#fff"
-          autoplay="!data.goodsDetail.basicInfo.videoId" circular>
-          <swiper-item wx:if="goodsDetail.basicInfo.videoId">
-            <video src="videoMp4Src" autoplay="true" loop="true" style='width:100%;height:100%;'></video>
-          </swiper-item>
-          <swiper-item wx:for="goodsDetail.pics" wx:key="id">
-            <image src="item.pic" class="slide-image" mode="aspectFill" lazy-load="true" bindtap="previewImage2"
-              data-url="item.pic" />
-          </swiper-item>
-        </swiper> -->
-      </div>
-      <div class="goods-info">
-        <div class="goods-info-top-container">
-          <div class="goods-profile">
-            <div class="p"><text>¥</text> {{ data.selectSizePrice }}</div>
-            <div v-if="data.goodsDetail.basicInfo.originalPrice && data.goodsDetail.basicInfo.originalPrice > 0"
-              class="goods-price" style="color:#aaa;text-decoration:line-through;padding: 15rpx 0rpx 0rpx 15rpx;">
-              <span>¥</span> {{ data.selectSizeOPrice }}
-            </div>
-          </div>
-          <div class="goods-info-fx">
-            <div class='item left'>
-              <van-icon name="share-o" size="24px" />
-              <div class="icon-title">分享</div>
-              <button open-type='share'></button>
-            </div>
-            <div class='item' bindtap="drawSharePic">
-              <van-icon name="qr" size="24px" />
-              <div class="icon-title">二维码</div>
-            </div>
-          </div>
+  <div class="page">
+    <Topbar title="商品详情" v-if="!isInWechat" />
+    <div class="container">
+      <van-sticky v-if="data.createTabs">
+        <div id="tabs" class="tabs-container">
+          <van-tabs sticky bind:click="onTabsChange" custom-class="" :active="data.active">
+            <van-tab v-for="item in data.tabs" :title="item.tabs_name" :name="item.tabs_name" />
+          </van-tabs>
         </div>
-        <div class="goods-title">{{ data.goodsDetail.basicInfo.name }}</div>
-        <div class="characteristic">{{ data.goodsDetail.basicInfo.characteristic }}</div>
-        <div class="goods-share" v-if="data.goodsDetail.basicInfo.commissionType == 1">分享有赏，好友下单后可得
-          {{ data.goodsDetail.basicInfo.commission }} 积分奖励</div>
-        <div class="goods-share" v-if="data.goodsDetail.basicInfo.commissionType == 2">分享有赏，好友下单后可得
-          {{ data.goodsDetail.basicInfo.commission }}元 现金奖励</div>
-      </div>
-
-
-      <van-cell v-if="data.hasMoreSelect && data.goodsDetailSkuShowType == 0"
-        custom-class="vw100 goods-property-container" :border="false" is-link bind:click="bindGuiGeTap">
-        <div slot="title">
-          请选择:
-          <!-- TODO:template能v-for吗？ -->
-          <div v-for="item in data.goodsDetail.properties" :key="item.id"> {{ item.name }}</div>
-          <div v-for="item in data.goodsAddition" :key="item.id"> {{ item.name }}</div>
+      </van-sticky>
+      <!-- 这是一段scroll-view -->
+      <div style="overflow: scroll" class="scroll-container" scroll-into-view="{{toView}}" scroll-y="true" scroll-with-animation="true"
+        bindscroll="bindscroll">
+        <div class="swiper-container" id="swiper-container">
+          <!-- 这是一段轮播图 -->
+  
+          <van-swipe class="swiper_box" :autoplay="3000" indicator-color="white">
+            <van-swipe-item v-for="item in data.goodsDetail.pics" :key="item.id">
+              <img :src="item.pic" class="slide-image" mode="aspectFill" lazy-load="true" bindtap="previewImage2"
+                :data-url="item.pic" />
+            </van-swipe-item>
+          </van-swipe>
+          <!-- <swiper class="swiper_box" indicator-dots="true" indicator-active-color="#fff"
+            autoplay="!data.goodsDetail.basicInfo.videoId" circular>
+            <swiper-item wx:if="goodsDetail.basicInfo.videoId">
+              <video src="videoMp4Src" autoplay="true" loop="true" style='width:100%;height:100%;'></video>
+            </swiper-item>
+            <swiper-item wx:for="goodsDetail.pics" wx:key="id">
+              <image src="item.pic" class="slide-image" mode="aspectFill" lazy-load="true" bindtap="previewImage2"
+                data-url="item.pic" />
+            </swiper-item>
+          </swiper> -->
         </div>
-      </van-cell>
-      <div class="size-label-box2" v-if="data.goodsDetailSkuShowType == 1">
-        <div class="label-title">选择商品规格</div>
-        <!-- TODO:这里很怪啊，在呢吗一会 property， 一会item的-->
-        <!-- <div class="size-label-box">
-              <div v-for="property in data.goodsDetail.properties" wx:for-item="property" wx:for-index="idx" :key="item.id">
-                <div class="label">{{ property.name }}</div>
-                <div class="label-item-box">
-                  <div class="label-item {{item.active ? 'active' : '' }}" wx:for="{{property.childsCurGoods}}" wx:key="id"
-                    bindtap="labelItemTap" data-propertyindex="{{idx}}" data-propertychildindex="{{index}}">
-                    {{ item.name }}
-                  </div>
-                </div>
+        <div class="goods-info">
+          <div class="goods-info-top-container">
+            <div class="goods-profile">
+              <div class="p"><text>¥</text> {{ data.selectSizePrice }}</div>
+              <div v-if="data.goodsDetail.basicInfo.originalPrice && data.goodsDetail.basicInfo.originalPrice > 0"
+                class="goods-price" style="color:#aaa;text-decoration:line-through;padding: 15rpx 0rpx 0rpx 15rpx;">
+                <span>¥</span> {{ data.selectSizeOPrice }}
               </div>
-            </div> -->
-        <van-cell title="购买数量">
-          <div>
-            <van-stepper :value="data.buyNumber" :min="data.buyNumMin" :max="data.buyNumMax" bind:change="stepChange" />
+            </div>
+            <div class="goods-info-fx">
+              <div class='item left'>
+                <van-icon name="share-o" size="24px" />
+                <div class="icon-title">分享</div>
+                <button open-type='share'></button>
+              </div>
+              <div class='item' bindtap="drawSharePic">
+                <van-icon name="qr" size="24px" />
+                <div class="icon-title">二维码</div>
+              </div>
+            </div>
+          </div>
+          <div class="goods-title">{{ data.goodsDetail.basicInfo.name }}</div>
+          <div class="characteristic">{{ data.goodsDetail.basicInfo.characteristic }}</div>
+          <div class="goods-share" v-if="data.goodsDetail.basicInfo.commissionType == 1">分享有赏，好友下单后可得
+            {{ data.goodsDetail.basicInfo.commission }} 积分奖励</div>
+          <div class="goods-share" v-if="data.goodsDetail.basicInfo.commissionType == 2">分享有赏，好友下单后可得
+            {{ data.goodsDetail.basicInfo.commission }}元 现金奖励</div>
+        </div>
+  
+  
+        <van-cell v-if="data.hasMoreSelect && data.goodsDetailSkuShowType == 0"
+          custom-class="vw100 goods-property-container" :border="false" is-link bind:click="bindGuiGeTap">
+          <div slot="title">
+            请选择:
+            <!-- TODO:template能v-for吗？ -->
+            <div v-for="item in data.goodsDetail.properties" :key="item.id"> {{ item.name }}</div>
+            <div v-for="item in data.goodsAddition" :key="item.id"> {{ item.name }}</div>
           </div>
         </van-cell>
-      </div>
-      <div v-if="data.shopSubdetail" class="shop-container">
-        <image mode="aspectFill" :src="data.shopSubdetail.info.pic"></image>
-        <div class="info">
-          <div class="title">{{ data.shopSubdetail.info.name }}</div>
-          <div class="address">{{ data.shopSubdetail.info.address }}</div>
+        <div class="size-label-box2" v-if="data.goodsDetailSkuShowType == 1">
+          <div class="label-title">选择商品规格</div>
+          <!-- TODO:这里很怪啊，在呢吗一会 property， 一会item的-->
+          <!-- <div class="size-label-box">
+                <div v-for="property in data.goodsDetail.properties" wx:for-item="property" wx:for-index="idx" :key="item.id">
+                  <div class="label">{{ property.name }}</div>
+                  <div class="label-item-box">
+                    <div class="label-item {{item.active ? 'active' : '' }}" wx:for="{{property.childsCurGoods}}" wx:key="id"
+                      bindtap="labelItemTap" data-propertyindex="{{idx}}" data-propertychildindex="{{index}}">
+                      {{ item.name }}
+                    </div>
+                  </div>
+                </div>
+              </div> -->
+          <van-cell title="购买数量">
+            <div>
+              <van-stepper :value="data.buyNumber" :min="data.buyNumMin" :max="data.buyNumMax" bind:change="stepChange" />
+            </div>
+          </van-cell>
+        </div>
+        <div v-if="data.shopSubdetail" class="shop-container">
+          <img mode="aspectFill" :src="data.shopSubdetail.info.pic" />
+          <div class="info">
+            <div class="title">{{ data.shopSubdetail.info.name }}</div>
+            <div class="address">{{ data.shopSubdetail.info.address }}</div>
+          </div>
+        </div>
+        <div class="goods-des-info" id="goods-des-info">
+          <div class="label-title">
+            <div class="left">商品详情</div>
+          </div>
+          <div class="goods-text">  
+            <div v-html="data.goodsDetail.content"></div>
+          </div>
         </div>
       </div>
-      <div class="goods-des-info" id="goods-des-info">
-        <div class="label-title">
-          <div class="left">商品详情</div>
-        </div>
-        <div class="goods-text">
-          <mp-html :content="data.goodsDetail.content" />
-        </div>
+      <van-action-bar v-if="!data.curGoodsKanjia">
+        <!-- TODO:路径跳转 -->
+        <van-action-bar-icon icon="chat-o" text="客服" open-type="contact"
+          :send-message-title="data.goodsDetail.basicInfo.name" :send-message-img="data.goodsDetail.basicInfo.pic"
+          :send-message-path="`/pages/goods-details/index?id=${data.goodsDetail.basicInfo.id}`" :show-message-card="true" />
+        <van-action-bar-icon icon="share-o" text="分享" bind:click="addFav" />
+        <van-action-bar-button type="danger" v-if="!data.goodsDetail.basicInfo.pingtuan" text="立即购买" :data-shopType="data.shopType"
+        @click="gotoPayOrder(data.goodsDetail.basicInfo.id)" />
+      </van-action-bar>
+    </div>
+  
+    <!-- TODO:poster是什么 -->
+    <!-- <template v-if="data.posterShow">
+      <div class="poster-mask"></div>
+      <div class="poster">
+        <canvas class="canvas" style="data.canvasstyle" canvas-id="firstCanvas"></canvas>
       </div>
-    </div>
-    <van-action-bar v-if="!data.curGoodsKanjia">
-      <!-- TODO:路径跳转 -->
-      <van-action-bar-icon icon="chat-o" text="客服" open-type="contact"
-        :send-message-title="data.goodsDetail.basicInfo.name" :send-message-img="data.goodsDetail.basicInfo.pic"
-        :send-message-path="`/pages/goods-details/index?id=${data.goodsDetail.basicInfo.id}`" :show-message-card="true" />
-      <van-action-bar-icon :icon="data.faved ? 'like' : 'like-o'" text="收藏" bind:click="addFav" />
-      <van-action-bar-button v-if="!data.goodsDetail.basicInfo.pingtuan" text="立即购买" :data-shopType="data.shopType"
-        bind:click="tobuy orbuyNow" />
-    </van-action-bar>
-  </div>
-
-  <template v-if="data.posterShow">
-    <div class="poster-mask"></div>
-    <div class="poster">
-      <canvas class="canvas" style="data.canvasstyle" canvas-id="firstCanvas"></canvas>
-    </div>
-    <div class="poster-btn">
-      <van-button type="primary" size="mini" bindtap='_saveToMobile'> 保存图片 </van-button>
-      <van-button type="warning" size="mini" bindtap='closePop'> 关闭 </van-button>
-    </div>
-  </template>
-  <!-- TODO:poster是什么 -->
-  <!-- <poster id="poster" config="{{posterConfig}}" bind:success="onPosterSuccess" bind:fail="onPosterFail"></poster> -->
-  <div v-if="data.showposterImg" class="popup-mask"></div>
-  <div v-if="data.showposterImg" class="posterImg-box">
-    <img mode="widthFix" class="posterImg" :src="data.posterImg" />
-    <div class="btn-create" bindtap="savePosterPic">保存到相册</div>
-  </div>
-
-  <van-popup :show="!data.hideShopPopup" round closeable position="bottom"
-    custom-style="padding-top:48rpx;max-height: 80%;" bind:close="closePopupTap">
-    <!-- TODO:selectSizePrice != selectSizePrice 啥意思？ -->
-    <van-card centered :price="data.selectSizePrice"
-      :origin-price="data.selectSizePrice != data.selectSizePrice ? data.selectSizeOPrice : ''"
-      :title="data.goodsDetail.basicInfo.name" :thumb="data.skuGoodsPic" />
-    <!-- <div class="size-label-box">
-          <div wx:for="{{goodsDetail.properties}}" wx:for-item="property" wx:for-index="idx" wx:key="id">
-            <div class="label">{{ property.name }}</div>
-            <div class="label-item-box">
-              <div class="label-item {{item.active ? 'active' : '' }}" wx:for="{{property.childsCurGoods}}"
-                hidden="{{ item.hidden }}" wx:key="id" bindtap="labelItemTap" data-propertyindex="{{idx}}"
-                data-propertychildindex="{{index}}">
-                {{ item.name }}
+      <div class="poster-btn">
+        <van-button type="primary" size="mini" bindtap='_saveToMobile'> 保存图片 </van-button>
+        <van-button type="warning" size="mini" bindtap='closePop'> 关闭 </van-button>
+      </div>
+    </template>
+    <poster id="poster" config="{{posterConfig}}" bind:success="onPosterSuccess" bind:fail="onPosterFail"></poster>
+    <div v-if="data.showposterImg" class="popup-mask"></div>
+    <div v-if="data.showposterImg" class="posterImg-box">
+      <img mode="widthFix" class="posterImg" :src="data.posterImg" />
+      <div class="btn-create" bindtap="savePosterPic">保存到相册</div>
+    </div> -->
+  
+    <van-popup v-model:show="data.showShopPopup" round closeable position="bottom"
+      custom-style="padding-top:48rpx;max-height: 80%;" bind:close="closePopupTap">
+      <!-- TODO:selectSizePrice != selectSizePrice 啥意思？ -->
+      <van-card centered :price="data.selectSizePrice"
+        :origin-price="data.selectSizePrice != data.selectSizePrice ? data.selectSizeOPrice : ''"
+        :title="data.goodsDetail.basicInfo.name" :thumb="data.skuGoodsPic" />
+      <!-- <div class="size-label-box">
+            <div wx:for="{{goodsDetail.properties}}" wx:for-item="property" wx:for-index="idx" wx:key="id">
+              <div class="label">{{ property.name }}</div>
+              <div class="label-item-box">
+                <div class="label-item {{item.active ? 'active' : '' }}" wx:for="{{property.childsCurGoods}}"
+                  hidden="{{ item.hidden }}" wx:key="id" bindtap="labelItemTap" data-propertyindex="{{idx}}"
+                  data-propertychildindex="{{index}}">
+                  {{ item.name }}
+                </div>
               </div>
             </div>
-          </div>
-          <div wx:for="{{goodsAddition}}" wx:for-item="property" wx:for-index="idx" wx:key="id">
-            <div class="label">{{ property.name }}</div>
-            <div class="label-item-box">
-              <div class="label-item {{item.active ? 'active' : '' }}" wx:for="{{property.items}}" wx:key="id"
-                bindtap="labelItemTap2" data-propertyindex="{{idx}}" data-propertychildindex="{{index}}">
-                {{ item.name }}
+            <div wx:for="{{goodsAddition}}" wx:for-item="property" wx:for-index="idx" wx:key="id">
+              <div class="label">{{ property.name }}</div>
+              <div class="label-item-box">
+                <div class="label-item {{item.active ? 'active' : '' }}" wx:for="{{property.items}}" wx:key="id"
+                  bindtap="labelItemTap2" data-propertyindex="{{idx}}" data-propertychildindex="{{index}}">
+                  {{ item.name }}
+                </div>
               </div>
             </div>
-          </div>
-        </div> -->
-    <van-cell title="购买数量">
-      <div>
-        <van-stepper :value="data.buyNumber" :min="data.buyNumMin" :max="data.buyNumMax" bind:change="stepChange" />
-      </div>
-    </van-cell>
-    <van-button v-if="data.shopType == 'addShopCar'" bindtap="addShopCar" type="danger" block>加入购物车</van-button>
-    <van-button v-if="data.shopType == 'tobuy' || data.shopType == 'toPingtuan'" :data-shopType="data.shopType"
-      bindtap="buyNow" type="danger" block>立即购买</van-button>
-  </van-popup>
+          </div> -->
+      <van-cell title="购买数量">
+        <div>
+          <van-stepper :value="data.buyNumber" :min="data.buyNumMin" :max="data.buyNumMax" bind:change="stepChange" />
+        </div>
+      </van-cell>
+      <van-button v-if="data.shopType == 'addShopCar'" bindtap="addShopCar" type="danger" block>加入购物车</van-button>
+      <van-button v-if="data.shopType == 'tobuy' || data.shopType == 'toPingtuan'" :data-shopType="data.shopType"
+        @click="gotoPayOrder(data.goodsDetail.basicInfo.id)" type="danger" block>立即购买</van-button>
+    </van-popup>
+  </div>
 </template>
 
 <style scoped lang="scss">
@@ -341,7 +351,7 @@ onMounted(() => {
   height: convertRpxToVw(748);
 }
 
-swiper-item image {
+.van-swipe-item img {
   width: 100%;
   display: inline-block;
   overflow: hidden;
@@ -391,7 +401,7 @@ swiper-item image {
   font-size: 11px;
 }
 
-.goods-info-fx .item image {
+.goods-info-fx .item img {
   width: convertRpxToVw(50);
   height: convertRpxToVw(50);
 }
@@ -461,7 +471,7 @@ swiper-item image {
   margin-bottom: convertRpxToVw(32);
 }
 
-.row-arrow image {
+.row-arrow img {
   width: convertRpxToVw(40);
   height: convertRpxToVw(40);
 }
@@ -493,17 +503,18 @@ swiper-item image {
   color: #666666;
   line-height: convertRpxToVw(56);
   margin-bottom: convertRpxToVw(30);
+  :deep(img) {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
-.goods-text image {
-  width: 100%;
-}
 
 .des-imgs {
   width: 100%;
 }
 
-.des-imgs image {
+.des-imgs img {
   width: 100%;
 }
 
@@ -536,7 +547,7 @@ swiper-item image {
   z-index: 99;
 }
 
-.footer-box .contact image {
+.footer-box .contact img {
   width: convertRpxToVw(60);
   height: convertRpxToVw(60);
 }
@@ -550,7 +561,7 @@ swiper-item image {
   margin-left: convertRpxToVw(32);
 }
 
-.footer-box .shop-cart-btn image {
+.footer-box .shop-cart-btn img {
   width: convertRpxToVw(55);
   height: convertRpxToVw(55);
 }
@@ -897,7 +908,7 @@ swiper-item image {
   background: #fff;
 }
 
-.shop-container image {
+.shop-container img {
   width: convertRpxToVw(90);
   height: convertRpxToVw(90);
 }
@@ -948,7 +959,7 @@ swiper-item image {
   background: #ffffff;
 }
 
-.reputation-pics image {
+.reputation-pics img {
   width: convertRpxToVw(207);
   height: convertRpxToVw(207);
   margin: convertRpxToVw(32) 0 0 convertRpxToVw(32);

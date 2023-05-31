@@ -48,6 +48,8 @@ import WEBAPI from 'apifm-webapi'
 import wx from '@/lib/wx'
 import wxShare from '@/utils/wxShare'
 import { useUserStore } from '@/stores/user'
+// @ts-ignore
+import VueWechatTitle from 'vue-wechat-title'; //引入VueWechatTitle
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -97,6 +99,7 @@ app.use(Radio)
 app.use(Popup)
 
 app.use(createPinia())
+app.use(VueWechatTitle);
 app.use(router)
 
 const user = useUserStore()

@@ -7,11 +7,17 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: HomeView,
+      meta: {
+        title: '产品'
+      },
     },
     {
       path: '/goods-detail',
       name: 'goodesDetail',
+      meta: {
+        title: '商品详情'
+      },
       component: () => import('../views/GoodsDetail.vue')
     },
     {
@@ -25,16 +31,25 @@ const router = createRouter({
     {
       path: '/order',
       name: 'orderList',
+      meta: {
+        title: '订单'
+      },
       component: () => import('../views/OrderList.vue')
     },
     {
       path: '/apply',
       name: 'apply',
+      meta: {
+        title: '申请分销商'
+      },
       component: () => import('../views/Apply.vue')
     },
     {
       path: '/mine',
       name: 'mine',
+      meta: {
+        title: '会员中心'
+      },
       component: () => import('../views/Mine.vue')
     },
     {
@@ -45,16 +60,25 @@ const router = createRouter({
     {
       path: '/to-pay-order',
       name: 'toPayOrder',
+      meta: {
+        title: '提交订单'
+      },
       component: () => import('../views/ToPayOrder.vue')
     },
     {
       path: '/settings',
       name: 'settings',
+      meta: {
+        title: '个人设置'
+      },
       component: () => import('../views/Settings.vue')
     },
     {
       path: '/settings/aboutus',
       name: 'aboutus',
+      meta: {
+        title: '关于我'
+      },
       component: () => import('../views/Aboutus.vue')
     },
     {
@@ -75,26 +99,41 @@ const router = createRouter({
     {
       path: '/myusers',
       name: 'myusers',
+      meta: {
+        title: '我的团队'
+      },
       component: () => import('../views/MyUsers.vue')
     },
     {
       path: '/myusers-detail',
       name: 'myusers-detail',
+      meta: {
+        title: '会员信息'
+      },
       component: () => import('../views/MyUsersDetail.vue')
     },
     {
       path: '/commision-orderlist',
       name: 'commision-orderlist',
+      meta: {
+        title: '推广订单'
+      },
       component: () => import('../views/CommisionOrderList.vue')
     },
     {
       path: '/distribution',
       name: 'distribution',
+      meta: {
+        title: '分销中心'
+      },
       component: () => import('../views/distribution/Distribution.vue')
     },
     {
       path: '/assets',
       name: 'assets',
+      meta: {
+        title: '资产'
+      },
       component: () => import('../views/Assets.vue')
     }
   ]
