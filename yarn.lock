@@ -736,6 +736,11 @@
     "@typescript-eslint/types" "5.59.6"
     eslint-visitor-keys "^3.3.0"
 
+"@vant/area-data@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@vant/area-data/-/area-data-1.4.1.tgz#b4f1bce05dbb147dc08fd2ed9b2a0f63d3329b29"
+  integrity sha512-D8zI/rfxREhnIKGoYzsEJZ73fte4JARhFeFftLIH7ynu1sPrCBEgPkLEbwPyvw3VC4JdSIuzaK5uOhu+BcoPXw==
+
 "@vant/popperjs@^1.3.0":
   version "1.3.0"
   resolved "https://registry.npmjs.org/@vant/popperjs/-/popperjs-1.3.0.tgz"
@@ -1089,10 +1094,10 @@ anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-apifm-webapi@^3.60.4:
-  version "3.60.4"
-  resolved "https://registry.npmjs.org/apifm-webapi/-/apifm-webapi-3.60.4.tgz"
-  integrity sha512-Bjjx1VtoAyGbZYIuwVT6ua9kmLIqmepUYJUoiDLaOc2REFA6eKbmEEsLM1VCerflI923KC4pnxRvxxleiVYI5g==
+apifm-webapi@^3.60.5:
+  version "3.60.5"
+  resolved "https://registry.yarnpkg.com/apifm-webapi/-/apifm-webapi-3.60.5.tgz#8949bfe2ce6c5617944f6c915aab7e2ceced6254"
+  integrity sha512-brqKz75dR21AFscUu2hbqdnGy/pg7anJOA5nWCE4BEwpXx3ZJK43LqtKfW7mg0FYQcNgZPkXYnQjSKVXyjmEMg==
   dependencies:
     axios "^0.24.0"
 
@@ -1178,7 +1183,7 @@ aws4@^1.8.0:
 
 axios@^0.24.0:
   version "0.24.0"
-  resolved "https://registry.npmjs.org/axios/-/axios-0.24.0.tgz"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.24.0.tgz#804e6fa1e4b9c5288501dd9dff56a7a0940d20d6"
   integrity sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==
   dependencies:
     follow-redirects "^1.14.4"

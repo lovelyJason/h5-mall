@@ -70,6 +70,10 @@ const readConfigVal = () => {
   config.fx_type = user.getStorage('fx_type')
 }
 
+const gotoAssets = () => {
+  router.push('/assets')
+}
+
 onMounted(() => {
   readConfigVal()
   user.checkHasLogined().then(async (isLogined: boolean) => {
@@ -90,7 +94,7 @@ onMounted(() => {
 
 <template>
   <div class="mine">
-    <Topbar title="会员中心" :show-back="false" />
+    <Topbar v-if="!isInWechat" title="会员中心" :show-back="false" />
     <div class="header-box">
       <div class="header-box-left">
         <div class="avatar" :style="{backgroundImage: `url(${user.userData.base.avatarUrl})`}"></div>
@@ -101,11 +105,11 @@ onMounted(() => {
       </div>
     </div>
     <div class="asset">
-      <div class="item">
+      <div class="item" @click="gotoAssets">
         <div class="amount">{{ amountInfo.balance }}</div>
         <div>余额</div>
       </div>
-      <div class="item right">
+      <div class="item right" @click="gotoAssets">
         <div class="amount">{{ amountInfo.freeze }}</div>
         <div>冻结</div>
       </div>

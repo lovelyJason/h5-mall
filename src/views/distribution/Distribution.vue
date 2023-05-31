@@ -353,7 +353,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
-      <div v-if="user.userData.referrer.uid" class="tuan">
+      <div v-if="user.userData.referrer && user.userData.referrer.uid" class="tuan">
         <div>我的邀请人</div>
         <div class="line2"></div>
         <div style="display: flex">

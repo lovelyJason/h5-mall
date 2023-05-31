@@ -16,7 +16,8 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "apifm-webapi": "^3.60.4",
+    "@vant/area-data": "^1.4.1",
+    "apifm-webapi": "^3.60.5",
     "clipboard": "^2.0.11",
     "pinia": "^2.0.36",
     "vant": "^4.3.2",

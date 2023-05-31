@@ -2,7 +2,7 @@
 import Tabbar from '@/components/Tabbar.vue'  // TODO:不加后缀没识别
 import { ref, reactive, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router';
-import { showLoadingToast, showToast, showFailToast, showConfirmDialog  } from 'vant';
+import { showSuccessToast, showLoadingToast, showToast, showFailToast, showConfirmDialog  } from 'vant';
 import { useUserStore } from '@/stores/user';
 import { wxpay } from '@/utils/wxpay'
 
@@ -53,6 +53,7 @@ const cancelOrderClick = (e: any) => {
     const res = await WEBAPI.orderClose(user.getStorage('token'), orderId)
     if(res.code == 0) {
       page.value = 1
+      showSuccessToast('支付成功')
       getOrderList()
       getOrderStatistics()
     }

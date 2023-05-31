@@ -10,6 +10,11 @@ const router = createRouter({
       component: HomeView
     },
     {
+      path: '/goods-detail',
+      name: 'goodesDetail',
+      component: () => import('../views/GoodsDetail.vue')
+    },
+    {
       path: '/about',
       name: 'about',
       // route level code-splitting
@@ -87,6 +92,11 @@ const router = createRouter({
       name: 'distribution',
       component: () => import('../views/distribution/Distribution.vue')
     },
+    {
+      path: '/assets',
+      name: 'assets',
+      component: () => import('../views/Assets.vue')
+    }
   ]
 })
 

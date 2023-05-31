@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, inject, toRefs } from 'vue'
+import { ref, reactive, onMounted, inject, toRefs, computed, getCurrentInstance } from 'vue'
 import Topbar from '@/components/Topbar.vue'
 import { showSuccessToast, showFailToast, showToast, showConfirmDialog } from 'vant';
 import { useRouter } from 'vue-router';
 // import AUTH from '@/utils/auth.js'
 import { useUserStore } from '@/stores/user';
 import { wxpay } from '@/utils/wxpay'
+import { areaList } from '@vant/area-data';
 
 interface GoodsItem {
   basicInfo: object
@@ -44,12 +45,21 @@ const goodsList = reactive<any[]>([])
 const remark = ref<string>('')
 const amountInfo = ref<any>({})
 const btnLoading = ref<boolean>(false)
+const showArea = ref<boolean>(false)
 const preorderInfo = reactive<any>({
 })
-
+const data = reactive<any>({
+  peisongType: 'kd',
+  recipientInfo: {
+    name: '',
+    phone: '',
+    idCard: '',
+    detailedAddress: ''
+  }
+})
+let formInstance: any = null
 
 const user = useUserStore()
-const isLogined = user.isLogined
 
 const getPhoneNumber = async () => {
   router.push('/register')
@@ -68,6 +78,10 @@ const getGoodesDetail = async () => {
     }
   }
 }
+
+const isNeedLogistics = computed(() => {
+  return goodsDetail.logistics && Object.keys(goodsDetail.logistics).length > 0
+})
 
 const userAmount = async () => {
   const res = await WEBAPI.userAmount(user.getStorage('token'))
@@ -128,31 +142,40 @@ const createOrder = async (preorder: boolean) => {
   btnLoading.value = true
   // shopCarType: 0 //0自营购物车，1云货架购物车
   const token = user.getStorage('token') // 用户登录 token
-  const goodsJsonStr = JSON.stringify(goodsList.map((goodes) => {
+  const goodsJsonStr = JSON.stringify(goodsList.map((goods) => {
+    const _logistics = (goods.logistics && Object.keys(goods.logistics).length > 0) ? true : false
     return {
       goodsId: goodsDetail.basicInfo.id,
       number: 1,
-      inviter_id: 0,
-      logisticsType: '0', // 0 自己送货 1 快递
-      goodsType: '0'
+      // inviter_id: 0,  // 邀请用户ID, 这个对应的是后台营销辅助/分享奖励。和分销无关 https://www.it120.cc/help/uzf2xp.html
+      logisticsType: _logistics ? '1' : '0', // 0 自己送货 1 快递
+      goodsType: '0'  // 0 自营商品； 1 京东vop商品; 2 京东权益商品
     }
   }))
-  const postData = {
+  const postData: any = {
     token,
     goodsJsonStr,
     remark: remark.value,
     calculate: false,
     goodsType: '0', // 自营或者京东之类的
-    // peisongType: this.data.peisongType, // 配送类型
+    // peisongType: this.data.peisongType, // 配送类型 ， 快递 or 到店自取
     // cardId: this.data.cardId // 会员卡记录id
     // TODO: extJsonStr，可以填写联系人，联系电话啥的
   }
+  if(isNeedLogistics) {
+    postData.peisongType = data.peisongType
+  }
+
   if (preorder) {
     postData.calculate = true
   } else {
     // const extJsonStr = {}
   }
   try {
+    /**
+     * https://api.it120.cc/doc.html#/%E5%89%8D%E7%AB%AFapi%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3/%E8%AE%A2%E5%8D%95%E7%AE%A1%E7%90%86/createUsingPOST
+     * https://www.yuque.com/apifm/doc/itys0m
+     */
     const res = await WEBAPI.orderCreate(postData)
     btnLoading.value = false
     if(res.code == 0) {
@@ -167,21 +190,24 @@ const createOrder = async (preorder: boolean) => {
 }
 
 const goCreateOrder = () => {
-  // 检测实名认证状态
-  if(wx.getStorage('needIdCheck') == 1) {
-    // 先不处理实名认证
-  }
-  createOrder(false)
+  formInstance.ctx.$refs.form.validate().then(() => {
+    // 检测实名认证状态
+    if(wx.getStorage('needIdCheck') == 1) {
+      // 先不处理实名认证
+    }
+    createOrder(false)
+  })
 }
 
 onMounted(() => {
+  formInstance = getCurrentInstance()
   user.checkHasLogined().then(async (isLogined: boolean) => {
     if (isLogined) {
-      const token = localStorage.getItem('token')
       user.getUserApiInfo()
       await Promise.all([getGoodesDetail(), userAmount()])
-      createOrder(true)
+      await createOrder(true)
     } else {
+
       user.getNewToken({ code: route.query.code as string })
       // TODO:调用授权后再获取页面数据
       showFailToast({
@@ -191,13 +217,12 @@ onMounted(() => {
     }
   })
 })
-
 </script>
 
 <template>
-  <div class="page">
-    <Topbar title="确认订单" v-if="isLogined" />
-    <template v-if="!isLogined">
+  <div :class="{page: true, 'need-logistics': isNeedLogistics}">
+    <Topbar title="确认订单" v-if="user.isLogined && !isInWechat" />
+    <template v-if="!user.isLogined">
       <div class="login-box">
         <img class="logo" src="/images/wx.jpg" mode="widthFix" />
         <div class="line"></div>
@@ -228,19 +253,81 @@ onMounted(() => {
       </div>
       <div class="container-box cell-group">
         <div class="peisong-way">
-          <div class="row-box">
-            <div class="row-label">备注</div>
-            <div class="right-text">
-              <van-field v-model="remark" placeholder="如需备注请输入" />
-            </div>
-          </div>
+          <van-form ref="form" v-if="!!isNeedLogistics">
+            <van-cell-group >
+              <van-cell title="配送方式">
+                <template #value>
+                  <van-radio-group v-model="data.peisongType" bindchange="radioChange">
+                    <van-radio name="kd" :checked="data.peisongType == 'kd'"> 快递</van-radio>
+                  </van-radio-group>
+                </template>
+              </van-cell>
+              <van-field
+                v-model="data.recipientInfo.name"
+                name="name"
+                required
+                label="姓名"
+                placeholder="请输入姓名"
+                :rules="[{ required: true, message: '请输入姓名' }, { pattern: /^[\u4e00-\u9fa5]{2,4}$/, message: '请输入正确格式姓名' }]"
+              />
+              <van-field
+                v-model="data.recipientInfo.phone"
+                name="phone"
+                required
+                label="联系方式"
+                placeholder="请输入手机号"
+                :error-message="''"
+                :rules="[{ required: true, message: '请输入手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '请输入正确格式手机号' }]"
+              />
+              <van-field
+                v-model="data.recipientInfo.idCard"
+                name="idCard"
+                required
+                label="身份证号"
+                placeholder="请输入身份证号"
+                :rules="[{ required: true, message: '请输入身份证号' }]"
+              />
+              <!-- <van-cell style="margin-left: 8px;" @click="showArea = !showArea" required title="收货地址" is-link>
+                <template #value>
+                  <span>请选择</span>
+                  <van-popup
+                    v-model:show="showArea"
+                    position="bottom"
+                  >
+                    <van-area :area-list="areaList" />
+                  </van-popup>
+                </template>
+              </van-cell> -->
+              <van-field
+                v-model="data.recipientInfo.detailedAddress"
+                name="detailedAddress"
+                required
+                label="详细地址"
+                placeholder="请输入详细地址"
+                :rules="[{ required: true, message: '请输入详细地址' }]"
+              />
+            </van-cell-group>
+          </van-form>
+          <van-field
+            style="margin-left: 8px;"
+            label="备注"
+            placeholder="如需备注请输入"
+          />
         </div>
       </div>
-      <div class="bottom-box"></div>
+      <!-- <div class="bottom-box"></div> -->
       <van-submit-bar 
-        :price="preorderInfo.amountReal * 100" s
+        v-if="!isNeedLogistics"
+        :price="preorderInfo.amountReal * 100"
         uffix-label="" 
         button-text="提交订单" 
+        :loading="btnLoading"
+        @submit="goCreateOrder"
+      />
+      <van-submit-bar 
+        v-else
+        uffix-label="" 
+        button-text="0.01元领取，包邮到家" 
         :loading="btnLoading"
         @submit="goCreateOrder"
       />
@@ -254,12 +341,19 @@ div,
 img,
 input,
 textarea {
-  display: block;
   box-sizing: border-box;
 }
 
 .page {
   background-color: #f2f2f2;
+  &.need-logistics {
+    --van-submit-bar-button-width: 200px;
+    --van-submit-bar-button-width: 100%;
+    // van-submit-bar
+   .van-submit-bar {
+      width: 100%;
+    }
+  }
 }
 
 .address-box {
@@ -393,12 +487,17 @@ form {
   color: #999;
 }
 
-.peisong-way {
+.peisong-way  {
   width: 100%;
-  height: 42px;
   background-color: #fff;
   margin-bottom: convertRpxToVw(20);
-
+  .van-radio-group {
+    display: flex;
+    justify-content: flex-end;
+    .van-radio {
+      margin-right: 6px;
+    }
+  }
   .row-box {
     width: convertRpxToVw(720);
     height: 42px;
@@ -409,34 +508,31 @@ form {
     padding: convertRpxToVw(24) 0 convertRpxToVw(24) convertRpxToVw(30);
     border-bottom: convertRpxToVw(1) solid #eee;
   }
-}
-
-
-.peisong-way .row-label.t {
-  color: #333;
-}
-
-.peisong-way .row-label {
-  font-size: convertRpxToVw(28);
-  color: #666;
-}
-
-.peisong-way .right-text {
-  font-size: convertRpxToVw(28);
-  color: #666;
-  padding-right: convertRpxToVw(30);
-  height: 42px;
-  line-height: 42px;
-  display: flex;
-  align-items: center;
-  .van-cell {
-    height: 42px;
+  .row-label.t {
+    color: #333;
   }
-}
+  .row-label {
+    font-size: convertRpxToVw(28);
+    color: #666;
+  }
 
-.peisong-way .liuyan {
-  width: convertRpxToVw(510);
-  font-size: convertRpxToVw(28);
+  .right-text {
+    font-size: convertRpxToVw(28);
+    color: #666;
+    padding-right: convertRpxToVw(30);
+    height: 42px;
+    line-height: 42px;
+    display: flex;
+    align-items: center;
+    .van-cell {
+      height: 42px;
+    }
+
+    .liuyan {
+      width: convertRpxToVw(510);
+      font-size: convertRpxToVw(28);
+    }
+  }
 }
 
 .goods-info {

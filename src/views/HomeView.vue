@@ -127,7 +127,8 @@ const onCategoryClick = async (e: number) => { // TODO: e的type是什么
   getGoodsList({ k: searchValue.value });
 }
 
-const gotoOrderPage = (id: number | string) => {
+const gotoOrderPage = (e: any, id: number | string) => {
+  e.stopPropagation();
   router.push('/to-pay-order?id=' + id)
 }
 
@@ -138,6 +139,11 @@ const onSearchClear = () => {
 const searchGoodes = () => {
   // resetGoodsList()
   getGoodsList({k: searchValue.value})
+}
+
+const gotoGoodsDetail = (e: any ,id: string | number) => {
+  e.stopPropagation();
+  router.push('/goods-detail?id=' + id)
 }
 
 onMounted(() => {
@@ -160,16 +166,21 @@ onMounted(() => {
       <van-col class="product-col right" span="16">
         <van-empty v-if="!currentGoods" description="暂无商品" />
         <van-card
+          @click="gotoGoodsDetail($event, item.id)"
           v-for="item in currentGoods"
           :key="item.id"
           num="1"
-          :price="item.minPrice"
+          :price="$filters.numFormat(item.minPrice)"
           :desc="item.numberSells ? '已售' + item.numberSells : ''"
           :title="item.name"
           :thumb="item.pic"
         >
           <template #footer>
-            <van-button size="mini" @click="gotoOrderPage(item.id)">下单</van-button>
+            <van-divider style="margin: 8px 0;" />
+            <div @click="gotoOrderPage($event, item.id)" class="prod-card-footer-order">
+              <span>立即下单</span>
+              <!-- <van-button plain hairline type="primary" size="large" @click="gotoOrderPage(item.id)">下单</van-button> -->
+            </div>
           </template>
         </van-card>
       </van-col>
@@ -178,7 +189,7 @@ onMounted(() => {
   </main>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 main {
   /* background-color: #ccc; */
   padding: 1rem 0.8rem 0;
@@ -199,5 +210,24 @@ main {
 .left, .right {
   height: calc(100vh - 120px);
   overflow: auto;
+}
+.prod-card-footer-order {
+  // margin-top: var(--van-card-padding);   // 无效？
+  text-align: center;
+  height: 28px;
+  line-height: 28px;
+  > span {
+    color: #00C4FF;
+  }
+
+  // .van-button {
+  //   height: 32px;
+  //   margin-left: 0;
+  //   border-radius: 18px;
+  //   border: var(--van-border-width) solid var(--van-button-primary-border-color);
+  //   &::before, &::after {
+  //     border: none;
+  //   }
+  // }
 }
 </style>

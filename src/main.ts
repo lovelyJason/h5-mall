@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import {
+  Area,
   Button,
   Search,
   Tabbar,
@@ -25,7 +26,16 @@ import {
   Dialog,
   Divider,
   Sticky,
-  Tag
+  Tag,
+  Stepper,
+  ActionBar, 
+  ActionBarIcon, 
+  ActionBarButton,
+  Swipe, 
+  SwipeItem,
+  RadioGroup,
+  Radio,
+  Popup
 } from 'vant'
 // 2. 引入组件样式
 import 'vant/lib/index.css'
@@ -42,6 +52,7 @@ import { useUserStore } from '@/stores/user'
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $filters: any
+    isInWechat: boolean
   }
 }
 
@@ -52,6 +63,7 @@ app.provide('$WEBAPI', WEBAPI)
 app.provide('wx', wx)
 app.provide('wxShare', wxShare)
 
+app.use(Area)
 app.use(Button)
 app.use(Search)
 app.use(Tabbar)
@@ -74,6 +86,15 @@ app.use(Dialog)
 app.use(Divider)
 app.use(Sticky)
 app.use(Tag)
+app.use(Stepper)
+app.use(ActionBar)
+app.use(ActionBarIcon)
+app.use(ActionBarButton)
+app.use(Swipe)
+app.use(SwipeItem)
+app.use(RadioGroup)
+app.use(Radio)
+app.use(Popup)
 
 app.use(createPinia())
 app.use(router)
@@ -100,6 +121,17 @@ app.config.globalProperties.$filters = {
     }
   }
 }
+
+function is_weixn(){
+  var ua = navigator.userAgent.toLowerCase();
+  if(ua.indexOf('micromessenger') != -1) {
+      return true;
+  } else {
+      return false;
+  }
+}
+
+app.config.globalProperties.isInWechat = is_weixn()
 
 // TODO:邀请页面也调用了，可以优化一下
 WEBAPI.queryConfigBatch(

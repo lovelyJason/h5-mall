@@ -147,6 +147,11 @@ declare module 'apifm-webapi' {
      * @param token 
      */
     function wxaQrcode(token: string): ApifmResponse
+    /**
+     * 获取资金明细
+     * @param data 包含token的一些数据
+     */
+    function cashLogsV2(data: any): ApifmResponse
   }
   export = ApifmWebapi
 }
