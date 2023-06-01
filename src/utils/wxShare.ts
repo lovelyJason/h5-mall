@@ -25,9 +25,9 @@ type wxShareConfigType = {
 }
 type shareSignType = {
 	debug: boolean,
-	appId: number | string,
+	appid: number | string,
 	timestamp: number | string,
-	nonceStr: string,
+	noncestr: string,
 	sign: string,
 	jsAppList: []
 }
@@ -67,7 +67,7 @@ const wxShare = {
 		// var postData = {
 		// 	url: authUrl
 		// }
-		const res = await WEBAPI.jssdkSign('/wx/jssdk/sign', authUrl)
+		const res = await WEBAPI.jssdkSign(authUrl)
 		if (res.code == 0) {
 			//分享链接授权签名信息
 			const sign = res.data;
@@ -80,9 +80,9 @@ const wxShare = {
 	_wxConfigJSSDK(shareSign: shareSignType) {	// TODO:这个传入的是sign字符串，怎么这里成了对象？
 		wx.config({
 			debug: false,
-			appId: shareSign.appId,	// TODO:值appid?
+			appId: shareSign.appid,	// TODO:值appid?
 			timestamp: shareSign.timestamp,
-			nonceStr: shareSign.nonceStr,
+			nonceStr: shareSign.noncestr,
 			signature: shareSign.sign,
 			jsApiList: ['onMenuShareAppMessage', 'onMenuShareTimeline']
 		})

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, inject } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 

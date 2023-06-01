@@ -1,5 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+// import { useUserStore } from '@/stores/user'; // store在router之前注册的，不能这么用
+import { checkHasLogined } from '@/utils/auth'
+import { redirectToWechatAuth } from '@/utils/index'
+
+// const user = useUserStore()
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,7 +53,8 @@ const router = createRouter({
       path: '/mine',
       name: 'mine',
       meta: {
-        title: '会员中心'
+        title: '会员中心',
+        auth: true
       },
       component: () => import('../views/Mine.vue')
     },
@@ -61,7 +67,8 @@ const router = createRouter({
       path: '/to-pay-order',
       name: 'toPayOrder',
       meta: {
-        title: '提交订单'
+        title: '提交订单',
+        auth: true
       },
       component: () => import('../views/ToPayOrder.vue')
     },
@@ -137,6 +144,18 @@ const router = createRouter({
       component: () => import('../views/Assets.vue')
     }
   ]
+})
+
+router.beforeEach(async (to, from) => {
+  if(to.meta.auth) {
+    if(to.query.code) {
+      
+    }
+    let isLogined = await checkHasLogined()
+    if(!isLogined) {
+      redirectToWechatAuth(false)
+    }
+  }
 })
 
 export default router

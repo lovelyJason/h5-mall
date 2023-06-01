@@ -4,7 +4,7 @@ import Topbar from '@/components/Topbar.vue'
 import { useRouter } from 'vue-router';
 import { showSuccessToast, showLoadingToast, showToast, showFailToast, showConfirmDialog } from 'vant';
 import { useUserStore } from '@/stores/user';
-import { goodsDetail } from 'apifm-webapi';
+import { redirectToWechatAuth } from '@/utils/index'
 
 const $WEBAPI: any = inject('$WEBAPI')
 const WEBAPI = $WEBAPI
@@ -118,9 +118,6 @@ onMounted(() => {
   user.checkHasLogined().then(async (isLogined: boolean) => {
     if (isLogined) {
     } else {
-      showFailToast({
-        message: '登录失效，需要重新获取授权信息' // 只是网页授权登录
-      })
     }
   })
   data.goodsId = route.query.id
@@ -186,10 +183,6 @@ onMounted(() => {
                 <div class="icon-title">分享</div>
                 <button open-type='share'></button>
               </div>
-              <div class='item' bindtap="drawSharePic">
-                <van-icon name="qr" size="24px" />
-                <div class="icon-title">二维码</div>
-              </div>
             </div>
           </div>
           <div class="goods-title">{{ data.goodsDetail.basicInfo.name }}</div>
@@ -248,10 +241,10 @@ onMounted(() => {
       </div>
       <van-action-bar v-if="!data.curGoodsKanjia">
         <!-- TODO:路径跳转 -->
-        <van-action-bar-icon icon="chat-o" text="客服" open-type="contact"
+        <van-action-bar-icon icon="home-o" text="首页" @click="router.push('/')" />
+        <van-action-bar-icon icon="service-o" text="客服" open-type="contact"
           :send-message-title="data.goodsDetail.basicInfo.name" :send-message-img="data.goodsDetail.basicInfo.pic"
           :send-message-path="`/pages/goods-details/index?id=${data.goodsDetail.basicInfo.id}`" :show-message-card="true" />
-        <van-action-bar-icon icon="share-o" text="分享" bind:click="addFav" />
         <van-action-bar-button type="danger" v-if="!data.goodsDetail.basicInfo.pingtuan" text="立即购买" :data-shopType="data.shopType"
         @click="gotoPayOrder(data.goodsDetail.basicInfo.id)" />
       </van-action-bar>

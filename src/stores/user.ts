@@ -6,7 +6,6 @@ import WEBAPI from 'apifm-webapi'
 // 设置store的值可以通过$patch或者调用这里的函数
 
 export const useUserStore = defineStore('user', () => {
-  const isLogined = ref(true)
   const userData = reactive({
     base: {
       id: 0,
@@ -66,7 +65,7 @@ export const useUserStore = defineStore('user', () => {
     if(authIno.code != 0) return null
     const token = authIno.data.token
     localStorage.setItem('token', token)
-    return token
+    return token 
   }
   // 要保证调用之前token是有效的
   async function getUserApiInfo(): Promise<object | null> {
@@ -86,5 +85,5 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { userData, getStorage, setStorage, isLogined, checkHasLogined, getNewToken, getUserApiInfo }
+  return { userData, getStorage, setStorage, checkHasLogined, getNewToken, getUserApiInfo }
 })

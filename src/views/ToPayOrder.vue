@@ -61,6 +61,8 @@ const data = reactive<any>({
   },
   areaCodeList: []
 })
+const isLogined = ref<boolean>(true)
+
 let formInstance: any = null
 
 const user = useUserStore()
@@ -220,8 +222,9 @@ const goCreateOrder = () => {
 
 onMounted(() => {
   formInstance = getCurrentInstance()
-  user.checkHasLogined().then(async (isLogined: boolean) => {
-    if (isLogined) {
+  user.checkHasLogined().then(async (_isLogined: boolean) => {
+    if (_isLogined) {
+      isLogined.value = _isLogined
       user.getUserApiInfo()
       await Promise.all([getGoodesDetail(), userAmount()])
       await createOrder(true)
@@ -240,8 +243,8 @@ onMounted(() => {
 
 <template>
   <div :class="{page: true, 'need-logistics': isNeedLogistics}">
-    <Topbar title="确认订单" v-if="user.isLogined && !isInWechat" />
-    <template v-if="!user.isLogined">
+    <Topbar title="确认订单" v-if="isLogined && !isInWechat" />
+    <template v-if="!isLogined">
       <div class="login-box">
         <img class="logo" src="/images/wx.jpg" mode="widthFix" />
         <div class="line"></div>

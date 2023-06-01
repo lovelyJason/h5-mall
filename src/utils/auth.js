@@ -1,18 +1,13 @@
 import WEBAPI from 'apifm-webapi'
 
+// user store本来能处理的，但是路由文件中使用store好像会报错，调用这里先
 // 检测登录状态，返回 true / false
 async function checkHasLogined() {
   const token = localStorage.getItem('token')
   if (!token) {
     return false
   }
-  // const loggined = await checkSession()
-  // if (!loggined) {   // 小程序有用
-  //   localStorage.removeItem('token')
-  //   return false
-  // }
   const checkTokenRes = await WEBAPI.checkToken(token)
-  console.log(checkTokenRes)
   if (checkTokenRes.code != 0) {
     localStorage.removeItem('token')
     return false

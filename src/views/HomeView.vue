@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Tabbar from '@/components/Tabbar.vue'  // TODO:不加后缀没识别
+import wx from '@/lib/wx';
 import { ref, reactive, onMounted, inject, toRefs } from 'vue'
 import { useRouter } from 'vue-router';
 
@@ -130,6 +131,8 @@ const onCategoryClick = async (e: number) => { // TODO: e的type是什么
 const gotoOrderPage = (e: any, id: number | string) => {
   e.stopPropagation();
   router.push('/to-pay-order?id=' + id)
+  // TODO:给入口关注公众号
+
 }
 
 const onSearchClear = () => {

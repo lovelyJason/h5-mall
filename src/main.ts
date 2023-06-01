@@ -1,7 +1,6 @@
 import './assets/main.css'
 
 import { createApp } from 'vue'
-import { createPinia } from 'pinia'
 
 import {
   Area,
@@ -47,6 +46,7 @@ import router from './router'
 import WEBAPI from 'apifm-webapi'
 import wx from '@/lib/wx'
 import wxShare from '@/utils/wxShare'
+import store from '@/stores/index'
 import { useUserStore } from '@/stores/user'
 // @ts-ignore
 import VueWechatTitle from 'vue-wechat-title'; //引入VueWechatTitle
@@ -98,12 +98,11 @@ app.use(RadioGroup)
 app.use(Radio)
 app.use(Popup)
 
-app.use(createPinia())
+app.use(store)
 app.use(VueWechatTitle);
 app.use(router)
 
 const user = useUserStore()
-
 
 app.config.globalProperties.$filters = {
   numFormat(value: number) {
