@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 // import { useUserStore } from '@/stores/user'; // store在router之前注册的，不能这么用
-import { checkHasLogined } from '@/utils/auth'
-import { redirectToWechatAuth } from '@/utils/index'
+import { checkHasLogined, redirectToWechatAuth, getNewToken } from '@/utils/auth'
+import { showFailToast } from 'vant';
 
 // const user = useUserStore()
 
@@ -99,11 +99,6 @@ const router = createRouter({
       component: () => import('../views/ApplyForm.vue')
     },
     {
-      path: '/invite',
-      name: 'invite',
-      component: () => import('../views/Invite.vue')
-    },
-    {
       path: '/myusers',
       name: 'myusers',
       meta: {
@@ -145,17 +140,55 @@ const router = createRouter({
     }
   ]
 })
-
+let n = 0
 router.beforeEach(async (to, from) => {
-  if(to.meta.auth) {
-    if(to.query.code) {
-      
+  n = n + 1
+  let code = to.query.code
+  let t = to.query.t
+  let path = to.path
+  if(code) {
+    let req: any = { 
+      code: code as string
     }
+    let newQuery = JSON.parse(JSON.stringify(to.query))
+    if(t) {
+      try {
+        const params = JSON.parse(window.atob(to.query.t as string))
+        req.referrer = params.id
+      } catch (error) {
+        // 邀请参数非法
+        showFailToast('参数非法')
+      }
+
+    }
+    // 至此任意path携带t参数就可以完成邀请，但是只有auth: true的才会wxmpAuth
+    // 如http://127.0.0.1:5173/mine?t=eyJpZCI6ODQ3MzUwOH0=
+    await getNewToken(req) // 这个code只能用一次，下一次就是500
+    delete newQuery.code
+    delete newQuery.t
+    // replace了也会触发一次导航守卫
+    return {
+      path,
+      query: newQuery
+    }
+  } else {
+    console.log('come in', to)
     let isLogined = await checkHasLogined()
     if(!isLogined) {
-      redirectToWechatAuth(false)
+      console.log(n, 'router unlogin') // ①
+      // 只有需要登录的页面才去获取授权
+      if(to.meta.auth) {
+        // console.log(111)  // 注意这边打印一会就消息了，因为下面跨域名跳转
+        let redirect_url = encodeURI(location.href)
+        redirectToWechatAuth(false, redirect_url) // ③
+      }
+    } else {
+      return true
     }
   }
+  // 经测试， 如果不带code且未登录时，①执行完以后，页面url会发生改变，但是此时没有正式导航到那个页面，再执行了②，然后导航到③的页面
+  // 所以不用担心页面导航到其他页面甚至其他域名下的页面时，后续代码会不会执行的问题
+  console.log(n, 'router end')  // ②
 })
 
 export default router

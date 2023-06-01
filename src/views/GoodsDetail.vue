@@ -4,6 +4,7 @@ import Topbar from '@/components/Topbar.vue'
 import { useRouter } from 'vue-router';
 import { showSuccessToast, showLoadingToast, showToast, showFailToast, showConfirmDialog } from 'vant';
 import { useUserStore } from '@/stores/user';
+// @ts-ignore
 import { redirectToWechatAuth } from '@/utils/index'
 
 const $WEBAPI: any = inject('$WEBAPI')
@@ -44,6 +45,7 @@ const data = reactive<any>({
   showposterImg: false,
   posterImg: ''
 })
+const isLogined = ref<boolean>(false)
 
 const readConfigVal = () => {
   // 读取系统参数
@@ -103,9 +105,21 @@ const goodsAddition = async () => {
   }
 }
 
-// TODO:立即购买之前还有一些判断逻辑
 const gotoPayOrder = (id: string | number) => {
-  router.push('/to-pay-order?id=' + id)
+  if(isLogined.value) {
+    router.push('/to-pay-order?id=' + id)
+  } else {
+    showToast('您还未登录')
+    router.push('/mine' + id)
+  }
+}
+
+const openCustomerService = () => {
+  showToast('开发中')
+}
+
+const shareGoods = () => {
+  showToast('开发中')
 }
 
 onMounted(() => {
@@ -115,8 +129,9 @@ onMounted(() => {
   if (route.query && route.query.inviter_id) {
     wx.setStorage('referrer', route.query.inviter_id)
   }
-  user.checkHasLogined().then(async (isLogined: boolean) => {
-    if (isLogined) {
+  user.checkHasLogined().then(async (_isLogined: boolean) => {
+    isLogined.value = _isLogined
+    if (_isLogined) {
     } else {
     }
   })
@@ -178,7 +193,7 @@ onMounted(() => {
               </div>
             </div>
             <div class="goods-info-fx">
-              <div class='item left'>
+              <div class='item left' @click="shareGoods">
                 <van-icon name="share-o" size="24px" />
                 <div class="icon-title">分享</div>
                 <button open-type='share'></button>
@@ -242,7 +257,7 @@ onMounted(() => {
       <van-action-bar v-if="!data.curGoodsKanjia">
         <!-- TODO:路径跳转 -->
         <van-action-bar-icon icon="home-o" text="首页" @click="router.push('/')" />
-        <van-action-bar-icon icon="service-o" text="客服" open-type="contact"
+        <van-action-bar-icon @click="openCustomerService" icon="service-o" text="客服" open-type="contact"
           :send-message-title="data.goodsDetail.basicInfo.name" :send-message-img="data.goodsDetail.basicInfo.pic"
           :send-message-path="`/pages/goods-details/index?id=${data.goodsDetail.basicInfo.id}`" :show-message-card="true" />
         <van-action-bar-button type="danger" v-if="!data.goodsDetail.basicInfo.pingtuan" text="立即购买" :data-shopType="data.shopType"

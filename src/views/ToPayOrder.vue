@@ -73,7 +73,7 @@ const getPhoneNumber = async () => {
 
 const getGoodesDetail = async () => {
   const id = route.query.id
-  const token = user.getStorage('token')
+  const token = wx.getStorage('token')
   if (orderType.value === 'buyNow') {
     const res = await WEBAPI.goodsDetail(id, token)
     if(res.code == 0) {
@@ -96,7 +96,7 @@ const isNeedLogistics = computed(() => {
 })
 
 const userAmount = async () => {
-  const res = await WEBAPI.userAmount(user.getStorage('token'))
+  const res = await WEBAPI.userAmount(wx.getStorage('token'))
   if (res.code == 0) {
     Object.assign(amountInfo, res.data)
     return res.data
@@ -117,7 +117,7 @@ const processAfterCreateOrder = (orderInfo: any) => {
         cancelButtonText: '暂不付款',
         confirmButtonText: '确认支付',
       }).then(() => {
-        const token = user.getStorage('token')
+        const token = wx.getStorage('token')
         WEBAPI.orderPay(token, orderId).then((payRes: any) => {
           if(payRes.code != 0) {
             showToast(payRes.msg);
@@ -153,7 +153,7 @@ const processAfterCreateOrder = (orderInfo: any) => {
 const createOrder = async (preorder: boolean) => {
   btnLoading.value = true
   // shopCarType: 0 //0自营购物车，1云货架购物车
-  const token = user.getStorage('token') // 用户登录 token
+  const token = wx.getStorage('token') // 用户登录 token
   const goodsJsonStr = JSON.stringify(goodsList.map((goods) => {
     const _logistics = (goods.logistics && Object.keys(goods.logistics).length > 0) ? true : false
     return {
@@ -189,6 +189,10 @@ const createOrder = async (preorder: boolean) => {
     postData.calculate = true
   } else {
     // const extJsonStr = {}
+    showToast({
+      message: '订单提交中',
+      position: 'top',
+    })
   }
   try {
     /**
@@ -230,12 +234,6 @@ onMounted(() => {
       await createOrder(true)
     } else {
 
-      user.getNewToken({ code: route.query.code as string })
-      // TODO:调用授权后再获取页面数据
-      showFailToast({
-        message: '登录失效，需要重新获取授权信息' // 只是网页授权登录
-      })
-      // TODO:跳到微信中转页静默授权
     }
   })
 })
@@ -275,8 +273,8 @@ onMounted(() => {
       </div>
       <div class="container-box cell-group">
         <div class="peisong-way">
-          <van-form ref="form" v-if="!!isNeedLogistics">
-            <van-cell-group >
+          <van-form ref="form" >
+            <van-cell-group v-if="!!isNeedLogistics">
               <van-cell title="配送方式">
                 <template #value>
                   <van-radio-group v-model="data.peisongType" bindchange="radioChange">
@@ -331,13 +329,13 @@ onMounted(() => {
                 :rules="[{ required: true, message: '请输入详细地址' }]"
               />
             </van-cell-group>
+            <van-field
+              v-model="remark"
+              style="padding-left: 24px;"
+              label="备注"
+              placeholder="如需备注请输入"
+            />
           </van-form>
-          <van-field
-            v-model="remark"
-            style="padding-left: 24px;"
-            label="备注"
-            placeholder="如需备注请输入"
-          />
         </div>
       </div>
       <!-- <div class="bottom-box"></div> -->

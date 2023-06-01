@@ -14,10 +14,12 @@ const router = useRouter()
 
 const page = ref<number>(0)
 const orderStatisticsInfo = reactive({})
-const orderList = reactive<any>([])
 const goodsMap = reactive<any>({})
 const sphpay_open = ref<string>('0')
 const payButtonClicked = ref<boolean>(false)
+const data = reactive<any>({
+  orderList: []
+})
 
 const getOrderStatistics = async () => {
   const res = await WEBAPI.orderStatistics(wx.getStorage('token'))
@@ -40,7 +42,7 @@ const getOrderList = async () => {
   let res = await WEBAPI.orderList(postData)
   orderLoading.close()
   if(res.code == 0) {
-    orderList.push(...res.data.orderList)
+    data.orderList = res.data.orderList
     Object.assign(goodsMap, res.data.goodsMap)
   }
 }
@@ -50,7 +52,7 @@ const cancelOrderClick = (e: any) => {
   showConfirmDialog({
     title: '确定要取消该订单吗？'
   }).then(async () => {
-    const res = await WEBAPI.orderClose(user.getStorage('token'), orderId)
+    const res = await WEBAPI.orderClose(wx.getStorage('token'), orderId)
     if(res.code == 0) {
       page.value = 1
       showSuccessToast('支付成功')
@@ -63,9 +65,9 @@ const cancelOrderClick = (e: any) => {
 const payHelper = (orderId: number, money: number) => {
   if (money <= 0) {
     // 直接使用余额支付
-    WEBAPI.orderPay(user.getStorage('token'), orderId).then(function (res: any) {
+    WEBAPI.orderPay(wx.getStorage('token'), orderId).then(function (res: any) {
       page.value = 1
-      orderList()
+      getOrderList()
       getOrderStatistics()
     })
   } else {
@@ -85,9 +87,9 @@ const onPayClick = async (e: any) => {
   const orderId = e.currentTarget.dataset.id;
   let money = e.currentTarget.dataset.money;
   const needScore = e.currentTarget.dataset.score;
-  let res = await WEBAPI.userAmount(user.getStorage('token'))
+  let res = await WEBAPI.userAmount(wx.getStorage('token'))
   if(res.code == 0) {
-    const order_pay_user_balance = user.getStorage('order_pay_user_balance')
+    const order_pay_user_balance = wx.getStorage('order_pay_user_balance')
     const amountInfo = res.data
     if (order_pay_user_balance != '1') {
       amountInfo.balance = 0
@@ -129,10 +131,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <van-empty v-if="orderList.length <= 0" description="暂无订单" />
+  <van-empty v-if="data.orderList.length <= 0" description="暂无订单" />
   <div v-else class="order-list">
     <div class="a-order">
-      <div v-for="order in orderList" :key="order.id" class="order-item">
+      <div v-for="order in data.orderList" :key="order.id" class="order-item">
         <van-cell :title="order.orderNumber" :value="order.statusStr" size="large" />
         <div class="goods-img-container">
           <div v-for="(item, index) in goodsMap[order.id]" :key="index" class="img-box">
@@ -149,8 +151,8 @@ onMounted(() => {
           </div>
         </div>
         <div class="price-box">
-          <div @click="cancelOrderClick" class="btn" :hidden="order.status == 0 ? false : true" :data-id="order.id">取消订单</div>
-          <div @click="onPayClick" class="btn active" :hidden="order.status == 0 ? false : true" :data-id="order.id" :data-money="order.amountReal" :data-score="order.score">马上付款</div>
+          <div v-if="order.status == 0" @click="cancelOrderClick" class="btn"  :data-id="order.id">取消订单</div>
+          <div v-if="order.status == 0" @click="onPayClick" class="btn active"  :data-id="order.id" :data-money="order.amountReal" :data-score="order.score">马上付款</div>
           <div v-if="order.status == 0 && sphpay_open == '1'" class="btn active" :data-id="order.id" :data-money="order.amountReal" :data-score="order.score">视频号支付</div>
           <!-- <div class="btn active" :hidden="order.status == 0 || order.status == -1" :data-id="order.id" :data-amount='order.amountReal'>退换货</div> -->
         </div>

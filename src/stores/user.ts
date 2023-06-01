@@ -49,16 +49,6 @@ export const useUserStore = defineStore('user', () => {
     return true
   }
 
-  
-  // TODO: 应作为common store
-  function getStorage(key: string) {
-    return localStorage.getItem(key)
-  }
-
-  function setStorage(key: string, value: string) {
-    localStorage.setItem(key, value)
-  }
-
   async function getNewToken(data: WxmpAuthRequest): Promise<string | null> {
     // const wxcode = route.query.code
     const authIno = await WEBAPI.wxmpAuth(data)
@@ -85,5 +75,5 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { userData, getStorage, setStorage, checkHasLogined, getNewToken, getUserApiInfo }
+  return { userData, checkHasLogined, getNewToken, getUserApiInfo }
 })

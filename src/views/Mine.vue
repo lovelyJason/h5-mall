@@ -52,7 +52,7 @@ const editNick = async () => {
 }
 
 const userAmount = async () => {
-  const res = await WEBAPI.userAmount(user.getStorage('token'))
+  const res = await WEBAPI.userAmount(wx.getStorage('token'))
   if (res.code == 0) {
     Object.assign(amountInfo, res.data)
     return res.data
@@ -60,14 +60,14 @@ const userAmount = async () => {
 }
 
 const readConfigVal = () => {
-  config.order_hx_uids = user.getStorage('order_hx_uids'),
-  config.cps_open = user.getStorage('cps_open'),
-  config.recycle_open = user.getStorage('recycle_open'),
-  config.show_3_seller = user.getStorage('show_3_seller'),
-  config.show_quan_exchange_score = user.getStorage('show_quan_exchange_score'),
-  config.show_score_exchange_growth = user.getStorage('show_score_exchange_growth'),
-  config.show_score_sign = user.getStorage('show_score_sign'),
-  config.fx_type = user.getStorage('fx_type')
+  config.order_hx_uids = wx.getStorage('order_hx_uids'),
+  config.cps_open = wx.getStorage('cps_open'),
+  config.recycle_open = wx.getStorage('recycle_open'),
+  config.show_3_seller = wx.getStorage('show_3_seller'),
+  config.show_quan_exchange_score = wx.getStorage('show_quan_exchange_score'),
+  config.show_score_exchange_growth = wx.getStorage('show_score_exchange_growth'),
+  config.show_score_sign = wx.getStorage('show_score_sign'),
+  config.fx_type = wx.getStorage('fx_type')
 }
 
 const gotoAssets = () => {
@@ -80,12 +80,7 @@ onMounted(() => {
     if (isLogined) {
       Promise.all([user.getUserApiInfo(), userAmount()])
     } else {
-      user.getNewToken({ code: route.query.code as string })
-      // TODO:调用授权后再获取页面数据
-      showFailToast({
-        message: '登录失效，需要重新获取授权信息' // 只是网页授权登录
-      })
-      // TODO:跳到微信中转页静默授权
+     
     }
   })
 })

@@ -141,7 +141,7 @@ WEBAPI.queryConfigBatch(
 ).then((res: any) => {
   if (res.code == 0) {
     res.data.forEach((config: any) => {
-      user.setStorage(config.key, config.value)
+      wx.setStorage(config.key, config.value)
     })
   }
 })
