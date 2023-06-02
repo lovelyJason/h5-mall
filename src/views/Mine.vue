@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Tabbar from '@/components/Tabbar.vue'  // TODO:不加后缀没识别
+import Tabbar from '@/components/Tabbar.vue'
 import Topbar from '@/components/Topbar.vue';
 import { ref, reactive, inject, onMounted } from 'vue'
 import { useRouter } from 'vue-router';

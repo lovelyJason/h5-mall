@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Tabbar from '@/components/Tabbar.vue'  // TODO:不加后缀没识别
+import Tabbar from '@/components/Tabbar.vue'
 import { ref, reactive, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router';
 import { showSuccessToast, showLoadingToast, showToast, showFailToast, showConfirmDialog  } from 'vant';
@@ -185,7 +185,6 @@ onMounted(() => {
   white-space: nowrap;
 }
 .img-box {
-  /* TODO:自适应 */
   width: 50px;
   height: 50px;
   overflow: hidden;

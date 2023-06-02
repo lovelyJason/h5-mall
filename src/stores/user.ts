@@ -70,7 +70,6 @@ export const useUserStore = defineStore('user', () => {
       userData.referrer = res.data.referrer
       return userData
     } else {
-      // TODO:可以跳到微信授权页再回来
       return null
     }
   }

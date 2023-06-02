@@ -172,7 +172,7 @@ const createOrder = async (preorder: boolean) => {
     goodsType: '0', // 自营或者京东之类的
     // peisongType: this.data.peisongType, // 配送类型 ， 快递 or 到店自取
     // cardId: this.data.cardId // 会员卡记录id
-    // TODO: extJsonStr，可以填写联系人，联系电话啥的
+  
   }
   if(isNeedLogistics) {
     postData.peisongType = data.peisongType
@@ -256,7 +256,6 @@ onMounted(() => {
     </template>
     <template v-else>
       <div> <!-- 立即购买 -->
-        <!-- TODO:怎么往ts添加这种全局变量防止波浪线提示 -->
         <van-card 
           v-for="(item, index) in goodsList" 
           :key="index" 

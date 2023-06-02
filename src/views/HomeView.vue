@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Tabbar from '@/components/Tabbar.vue'  // TODO:不加后缀没识别
+import Tabbar from '@/components/Tabbar.vue'
 import wx from '@/lib/wx';
 import { ref, reactive, onMounted, inject, toRefs } from 'vue'
 import { useRouter } from 'vue-router';
@@ -114,7 +114,7 @@ const resetGoodsList = () => {
   currentGoods.length = 0
 }
 
-const onCategoryClick = async (e: number) => { // TODO: e的type是什么
+const onCategoryClick = async (e: number) => {
   //@ts-ignore
   const idx = e
   if (idx == activeCategory.value) {
@@ -150,7 +150,6 @@ const gotoGoodsDetail = (e: any ,id: string | number) => {
 }
 
 onMounted(() => {
-  // TODO: 携带inviter_id
   categories()
 })
 
@@ -196,6 +195,9 @@ onMounted(() => {
 main {
   /* background-color: #ccc; */
   padding: 1rem 0.8rem 0;
+  .van-sidebar {
+    width: 100%;
+  }
 }
 .category-col, .product-col {
   /* background-color: #fff; */

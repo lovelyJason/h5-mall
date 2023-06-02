@@ -80,7 +80,7 @@ const wxShare = {
 	_wxConfigJSSDK(shareSign: shareSignType) {	// TODO:这个传入的是sign字符串，怎么这里成了对象？
 		wx.config({
 			debug: false,
-			appId: shareSign.appid,	// TODO:值appid?
+			appId: shareSign.appid,
 			timestamp: shareSign.timestamp,
 			nonceStr: shareSign.noncestr,
 			signature: shareSign.sign,

@@ -91,11 +91,12 @@ onMounted(() => {
             <text class="p" v-if="item.score > 0">¥ {{ item.amountReal }} + {{ item.score }} 积分</text>
             ，累计佣金 <text class="p" v-if="item.score <= 0">{{ item.totalCommision }}</text>
           </div>
-          <van-cell v-if="item.goodsList && item.goodsList.length && data.userInviter[item.goodsList[0].commisionRecord.uids]"
-            title="销售员:{{ userInviter[item.goodsList[0].commisionRecord.uids].nick }}" />
+          <van-cell 
+            v-if="item.goodsList && item.goodsList.length && data.userInviter[item.goodsList[0].commisionRecord.uids]"
+            :title="`销售员: ${data.userInviter[item.goodsList[0].commisionRecord.uids].nick}`" />
           <div class="goods-info">
             <div class="goods-des">
-              <div class="remark" v-if="item.remark && item.remark != ''">{{ item.remark }}</div>
+              <div class="remark" v-if="item.remark && item.remark != ''">备注：{{ item.remark }}</div>
               <div style="font-size: 24rpx;color: #666;">下单日期：{{ item.dateAdd }} </div>
             </div>
           </div>

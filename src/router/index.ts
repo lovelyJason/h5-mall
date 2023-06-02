@@ -70,7 +70,15 @@ const router = createRouter({
         title: '提交订单',
         auth: true
       },
-      component: () => import('../views/ToPayOrder.vue')
+      component: () => import('../views/ToPayOrder.vue'),
+      beforeEnter: (to, from) => {
+        const title = from.meta.title
+        if(title === '产品' || title === '商品详情' || !from.name) {
+          return true
+        } else {
+          return false
+        }
+      },
     },
     {
       path: '/settings',
@@ -172,18 +180,15 @@ router.beforeEach(async (to, from) => {
       query: newQuery
     }
   } else {
-    console.log('come in', to)
-    let isLogined = await checkHasLogined()
-    if(!isLogined) {
-      console.log(n, 'router unlogin') // ①
-      // 只有需要登录的页面才去获取授权
-      if(to.meta.auth) {
-        // console.log(111)  // 注意这边打印一会就消息了，因为下面跨域名跳转
+    if(to.meta.auth) {
+      // TODO:怎么在router中访问pinia是个问题
+      let isLogined = await checkHasLogined()
+      if(!isLogined) {
         let redirect_url = encodeURI(location.href)
         redirectToWechatAuth(false, redirect_url) // ③
+      } else {
+        return true
       }
-    } else {
-      return true
     }
   }
   // 经测试， 如果不带code且未登录时，①执行完以后，页面url会发生改变，但是此时没有正式导航到那个页面，再执行了②，然后导航到③的页面

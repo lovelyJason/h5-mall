@@ -129,6 +129,7 @@ onMounted(() => {
   if (route.query && route.query.inviter_id) {
     wx.setStorage('referrer', route.query.inviter_id)
   }
+  // TODO:路由导航守卫里每次跳转都会checkToken，这里不再调了，全局获取登录状态
   user.checkHasLogined().then(async (_isLogined: boolean) => {
     isLogined.value = _isLogined
     if (_isLogined) {
@@ -146,7 +147,12 @@ onMounted(() => {
   getGoodsDetail(data.goodsId)
   goodsAddition()
 })
-
+;(function test() {
+  // data.hasMoreSelect = true 
+  // data.goodsDetailSkuShowType = 0
+  // data.goodsDetail.properties = [{id: 1, name: '11'},{id: 2, name: '22'}]
+  // data.goodsAddition = [{id: 1, name: '33'},{id: 2, name: '55'}]
+}())
 </script>
 
 <template>
@@ -161,8 +167,7 @@ onMounted(() => {
         </div>
       </van-sticky>
       <!-- 这是一段scroll-view -->
-      <div style="overflow: scroll" class="scroll-container" scroll-into-view="{{toView}}" scroll-y="true" scroll-with-animation="true"
-        bindscroll="bindscroll">
+      <div style="overflow: scroll" class="scroll-container"  bindscroll="bindscroll">
         <div class="swiper-container" id="swiper-container">
           <!-- 这是一段轮播图 -->
   
@@ -196,7 +201,11 @@ onMounted(() => {
               <div class='item left' @click="shareGoods">
                 <van-icon name="share-o" size="24px" />
                 <div class="icon-title">分享</div>
-                <button open-type='share'></button>
+                <button></button>
+              </div>
+              <div class='item' bindtap="drawSharePic">
+                <van-icon name="qr" size="24px"/>
+                <div class="icon-title">二维码</div>            
               </div>
             </div>
           </div>
@@ -208,43 +217,6 @@ onMounted(() => {
             {{ data.goodsDetail.basicInfo.commission }}元 现金奖励</div>
         </div>
   
-  
-        <van-cell v-if="data.hasMoreSelect && data.goodsDetailSkuShowType == 0"
-          custom-class="vw100 goods-property-container" :border="false" is-link bind:click="bindGuiGeTap">
-          <div slot="title">
-            请选择:
-            <!-- TODO:template能v-for吗？ -->
-            <div v-for="item in data.goodsDetail.properties" :key="item.id"> {{ item.name }}</div>
-            <div v-for="item in data.goodsAddition" :key="item.id"> {{ item.name }}</div>
-          </div>
-        </van-cell>
-        <div class="size-label-box2" v-if="data.goodsDetailSkuShowType == 1">
-          <div class="label-title">选择商品规格</div>
-          <!-- TODO:这里很怪啊，在呢吗一会 property， 一会item的-->
-          <!-- <div class="size-label-box">
-                <div v-for="property in data.goodsDetail.properties" wx:for-item="property" wx:for-index="idx" :key="item.id">
-                  <div class="label">{{ property.name }}</div>
-                  <div class="label-item-box">
-                    <div class="label-item {{item.active ? 'active' : '' }}" wx:for="{{property.childsCurGoods}}" wx:key="id"
-                      bindtap="labelItemTap" data-propertyindex="{{idx}}" data-propertychildindex="{{index}}">
-                      {{ item.name }}
-                    </div>
-                  </div>
-                </div>
-              </div> -->
-          <van-cell title="购买数量">
-            <div>
-              <van-stepper :value="data.buyNumber" :min="data.buyNumMin" :max="data.buyNumMax" bind:change="stepChange" />
-            </div>
-          </van-cell>
-        </div>
-        <div v-if="data.shopSubdetail" class="shop-container">
-          <img mode="aspectFill" :src="data.shopSubdetail.info.pic" />
-          <div class="info">
-            <div class="title">{{ data.shopSubdetail.info.name }}</div>
-            <div class="address">{{ data.shopSubdetail.info.address }}</div>
-          </div>
-        </div>
         <div class="goods-des-info" id="goods-des-info">
           <div class="label-title">
             <div class="left">商品详情</div>
@@ -265,7 +237,7 @@ onMounted(() => {
       </van-action-bar>
     </div>
   
-    <!-- TODO:poster是什么 -->
+    <!-- poster是wxa-plugin-canvas插件中的，生成精美海报 -->
     <!-- <template v-if="data.posterShow">
       <div class="poster-mask"></div>
       <div class="poster">
