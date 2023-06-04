@@ -25,7 +25,6 @@ import {
   Dialog,
   Divider,
   Sticky,
-  Tag,
   Stepper,
   ActionBar, 
   ActionBarIcon, 
@@ -34,7 +33,9 @@ import {
   SwipeItem,
   RadioGroup,
   Radio,
-  Popup
+  Popup,
+  List,
+  Tag
 } from 'vant'
 // 2. 引入组件样式
 import 'vant/lib/index.css'
@@ -50,6 +51,9 @@ import store from '@/stores/index'
 import { useUserStore } from '@/stores/user'
 // @ts-ignore
 import VueWechatTitle from 'vue-wechat-title'; //引入VueWechatTitle
+// import eruda from 'eruda'
+
+// eruda.init()
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -60,7 +64,13 @@ declare module '@vue/runtime-core' {
 
 const app = createApp(App)
 
-WEBAPI.init('jasonhuang') // 设置专属域名
+/**
+ * 等价
+ * https://api.it120.cc/jasonhuang/shop/goods/list/v2
+ * https://mall.qdovo.com/jasonhuang/shop/goods/list/v2
+ * 
+ */
+WEBAPI.init2('https://mall.qdovo.com', 'jasonhuang')
 app.provide('$WEBAPI', WEBAPI)
 app.provide('wx', wx)
 app.provide('wxShare', wxShare)
@@ -97,6 +107,7 @@ app.use(SwipeItem)
 app.use(RadioGroup)
 app.use(Radio)
 app.use(Popup)
+app.use(List)
 
 app.use(store)
 app.use(VueWechatTitle);

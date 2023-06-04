@@ -10,5 +10,46 @@
     <div id="app"></div>
     <!-- <script src="http://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script> -->
     <script type="module" src="/src/main.ts"></script>
+    <script>
+      if(typeof WeixinJSBridge == "undefined" && typeof onBridgeReady !== 'undefined'){
+        if(document.addEventListener ){
+          document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+        } else if (document.attachEvent){
+          document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+          document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+        }
+      } else {
+        if(typeof onBridgeReady !== 'undefined' ) {
+          onBridgeReady();
+        }
+      }
+    </script>
+    <script>
+      ;(function () {
+        var src = '//cdn.jsdelivr.net/npm/eruda';
+        let body = document.body
+        let count = 0
+        function handle(e) {
+          count++
+          if(count >= 16) {
+            body.removeEventListener('click', handle, true)
+            if(e.target.id !== 'mineDebug') return
+            // console.dir(e.target.id)
+            let children = body.children
+            let script1 = document.createElement('script')
+            script1.src = src
+            script1.id = 'erudaPackage'
+            let script2 = document.createElement('script')
+            script2.innerHTML = 'eruda.init()'
+            body.appendChild(script1)
+            alert('脚本正在初始化，稍候')
+            setTimeout(() => {
+              body.appendChild(script2)
+            }, 2000);
+          }
+        }
+        body.addEventListener('click', handle, true)
+      })();
+    </script>
   </body>
 </html>

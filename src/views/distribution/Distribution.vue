@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { showLoadingToast, showToast, showFailToast, showConfirmDialog } from 'vant';
 import Clipboard from "clipboard";
+import { generateInvitationLink } from '@/utils';
 
 const btnCopy = new Clipboard("#copyUid");
 const router = useRouter()
@@ -259,7 +260,10 @@ const handleUserInfo = async () => {
 }
 
 const copyContent = (e: any) => {
-  showToast('已复制到剪切板')
+  showToast({
+    position: 'top',
+    message: '已复制到剪切板，分享给好友吧！'
+  })
 }
 
 const saveToMobile = () => {
@@ -282,6 +286,10 @@ onMounted(() => {
     }
   })
 })
+
+const gotoAssets = () => {
+  router.push('/asset')
+}
 
 onBeforeUnmount(() => {
   btnCopy.destroy()
@@ -309,15 +317,15 @@ onBeforeUnmount(() => {
         <div class="header-box2"> </div>
         <div class="line"></div>
         <div class="asset">
-          <div class='item' bindtap='goAsset' :style="{ width: '72px' }">
+          <div class='item' @click="gotoAssets" :style="{ width: '72px' }">
             <div class="Count">{{ data.fxCommisionPaying }}</div>
             <div>未结算金额</div>
           </div>
-          <div class='item' bindtap='goAsset' :style="{ width: '72px' }">
+          <div class='item' @click="gotoAssets" :style="{ width: '72px' }">
             <div class="Count">{{ data.freeze }}</div>
             <div>冻结金额</div>
           </div>
-          <div class='item right' bindtap='goAsset' :style="{ width: '72px' }">
+          <div class='item right' @click="gotoAssets" :style="{ width: '72px' }">
             <div class="Count" style="color:#FF444A">{{ data.balance }}</div>
             <div>可用金额</div>
           </div>
@@ -378,7 +386,7 @@ onBeforeUnmount(() => {
               round 
               bindtap="copyContent"
               :data-id="user.userData.base.id"
-              :data-clipboard-text="user.userData.base.id"
+              :data-clipboard-text="generateInvitationLink(user.userData.base.id)"
               @click="copyContent"
             >
             复制

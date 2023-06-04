@@ -152,6 +152,22 @@ declare module 'apifm-webapi' {
      * @param data 包含token的一些数据
      */
     function cashLogsV2(data: any): Promise<ApifmResponse>
+    /**
+     * 获取订单详情
+     * @param token 
+     * @param id 订单id
+     */
+    function orderDetail(token: string, id: number | string): Promise<ApifmResponse>
+    /**
+     * 获取商品交易动态，返回最新的10条数据
+     * @param data 
+     */
+    function goodsDynamic(data: Record<string, any>): Promise<ApifmResponse>
+    /**
+     * 读取Banner轮播图
+     * @param data 
+     */
+    function banners(data: Record<string, any>): Promise<ApifmResponse>
   }
   export = ApifmWebapi
 }

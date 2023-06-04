@@ -19,11 +19,16 @@
     "@vant/area-data": "^1.4.1",
     "apifm-webapi": "^3.60.5",
     "clipboard": "^2.0.11",
+    "eruda": "^3.0.0",
+    "html2canvas": "^1.4.1",
     "pinia": "^2.0.36",
+    "qrcodejs2": "^0.0.2",
+    "qrcodejs2-fix": "^0.0.1",
     "vant": "^4.3.2",
     "vue": "^3.3.2",
     "vue-router": "^4.2.0",
     "vue-wechat-title": "^2.0.7",
+    "vue_qrcodes": "^1.1.3",
     "weixin-js-sdk": "^1.6.0"
   },
   "devDependencies": {

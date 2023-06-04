@@ -109,8 +109,9 @@ const gotoPayOrder = (id: string | number) => {
   if(isLogined.value) {
     router.push('/to-pay-order?id=' + id)
   } else {
-    showToast('您还未登录')
-    router.push('/mine' + id)
+    showToast('您还未登录，正在为您登录...') // 路由守卫里的下单页需要权限，会处理登录的
+    router.push('/to-pay-order?id=' + id)
+    // router.push('/mine?id=' + id)
   }
 }
 

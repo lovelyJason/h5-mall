@@ -12,13 +12,15 @@ const wx: any = inject('wx')
 const user = useUserStore()
 const router = useRouter()
 
-const page = ref<number>(0)
+const page = ref<number>(1)
 const orderStatisticsInfo = reactive({})
-const goodsMap = reactive<any>({})
 const sphpay_open = ref<string>('0')
 const payButtonClicked = ref<boolean>(false)
 const data = reactive<any>({
-  orderList: []
+  orderList: [],
+  goodsMap: {},
+  listLoading: false,
+  finished: false
 })
 
 const getOrderStatistics = async () => {
@@ -28,23 +30,38 @@ const getOrderStatistics = async () => {
   }
 }
 
-const getOrderList = async () => {
-  const orderLoading = showLoadingToast({
-    message: '加载中...',
-    forbidClick: true,
-    duration: 0
-  })
+const getOrderList = async (loadmore: boolean, req?: Record<string ,any>) => {
+  // const orderLoading = showLoadingToast({  // 覆盖了路由里的toast
+  //   message: '加载中...',
+  //   forbidClick: true,
+  //   duration: 0
+  // })
   var postData = {
     page: page.value,
+    // TODO:无限加载
     pageSize: 20,
-    token: wx.getStorage('token')
+    token: wx.getStorage('token'),
+    ...req
   }
   let res = await WEBAPI.orderList(postData)
-  orderLoading.close()
+  // orderLoading.close()
   if(res.code == 0) {
-    data.orderList = res.data.orderList
-    Object.assign(goodsMap, res.data.goodsMap)
+    if(loadmore) {
+      data.orderList.push(...res.data.orderList)
+      Object.assign(data.goodsMap, res.data.goodsMap)
+    } else {
+      data.orderList = res.data.orderList
+      data.goodsMap = res.data.goodsMap
+    }
+
   }
+}
+
+const loadList = async () => {
+  page.value++
+  await getOrderList(false, {page: page.value})
+  data.listLoading = false
+  data.finished = true
 }
 
 const cancelOrderClick = (e: any) => {
@@ -55,8 +72,8 @@ const cancelOrderClick = (e: any) => {
     const res = await WEBAPI.orderClose(wx.getStorage('token'), orderId)
     if(res.code == 0) {
       page.value = 1
-      showSuccessToast('支付成功')
-      getOrderList()
+      showSuccessToast('取消成功')
+      getOrderList(false)
       getOrderStatistics()
     }
   })
@@ -67,11 +84,11 @@ const payHelper = (orderId: number, money: number) => {
     // 直接使用余额支付
     WEBAPI.orderPay(wx.getStorage('token'), orderId).then(function (res: any) {
       page.value = 1
-      getOrderList()
+      getOrderList(true)
       getOrderStatistics()
     })
   } else {
-    wxpay('order', money, orderId, router, "/pages/order-list/index");
+    wxpay('order', money, orderId, router, "/order");
   }
 }
 
@@ -123,9 +140,14 @@ const onPayClick = async (e: any) => {
 
 }
 
+const gotoOrderDetail = (id: any) => {
+  router.push('/order-detail?id=' + id)
+}
+
 onMounted(() => {
+  wx.configByurl(location.href, ['chooseWXPay'])
   getOrderStatistics()
-  getOrderList()
+  getOrderList(false)
   sphpay_open.value = wx.getStorage('sphpay_open')
 })
 </script>
@@ -134,31 +156,39 @@ onMounted(() => {
   <van-empty v-if="data.orderList.length <= 0" description="暂无订单" />
   <div v-else class="order-list">
     <div class="a-order">
-      <div v-for="order in data.orderList" :key="order.id" class="order-item">
-        <van-cell :title="order.orderNumber" :value="order.statusStr" size="large" />
-        <div class="goods-img-container">
-          <div v-for="(item, index) in goodsMap[order.id]" :key="index" class="img-box">
-            <img :src="item.pic" >
+      <van-list
+        v-model:loading="data.listLoading"
+        :finished="data.finished"
+        finished-text="没有更多了"
+        @load="loadList"
+      >
+        <div v-for="order in data.orderList" :key="order.id" class="order-item">
+          <van-cell @click="gotoOrderDetail(order.id)" :title="order.orderNumber" :value="order.statusStr" size="large" />
+          <div class="goods-img-container">
+            <div v-for="(item, index) in data.goodsMap[order.id]" :key="index" class="img-box">
+              <img :src="item.pic" >
+            </div>
+          </div>
+          <div class="goods-price">共 {{ order.goodsNumber }} 件商品 合计：
+            <span v-if="order.score <= 0" class="price">¥ {{ order.amountReal }}</span>
+            <span v-else class="price">¥ {{ order.amountReal }} + {{ order.score }} 积分</span>
+          </div>
+          <div class="goods-info">
+            <div class="goods-des">
+              {{ order.dateAdd }}
+            </div>
+          </div>
+          <div class="price-box">
+            <div v-if="order.status == 0" @click="cancelOrderClick" class="btn"  :data-id="order.id">取消订单</div>
+            <div v-if="order.status == 0" @click="onPayClick" class="btn active"  :data-id="order.id" :data-money="order.amountReal" :data-score="order.score">马上付款</div>
+            <div v-if="order.status == 0 && sphpay_open == '1'" class="btn active" :data-id="order.id" :data-money="order.amountReal" :data-score="order.score">视频号支付</div>
+            <!-- <div class="btn active" :hidden="order.status == 0 || order.status == -1" :data-id="order.id" :data-amount='order.amountReal'>退换货</div> -->
           </div>
         </div>
-        <div class="goods-price">共 {{ order.goodsNumber }} 件商品 合计：
-          <span v-if="order.score <= 0" class="price">¥ {{ order.amountReal }}</span>
-          <span v-else class="price">¥ {{ order.amountReal }} + {{ order.score }} 积分</span>
-        </div>
-        <div class="goods-info">
-          <div class="goods-des">
-            {{ order.dateAdd }}
-          </div>
-        </div>
-        <div class="price-box">
-          <div v-if="order.status == 0" @click="cancelOrderClick" class="btn"  :data-id="order.id">取消订单</div>
-          <div v-if="order.status == 0" @click="onPayClick" class="btn active"  :data-id="order.id" :data-money="order.amountReal" :data-score="order.score">马上付款</div>
-          <div v-if="order.status == 0 && sphpay_open == '1'" class="btn active" :data-id="order.id" :data-money="order.amountReal" :data-score="order.score">视频号支付</div>
-          <!-- <div class="btn active" :hidden="order.status == 0 || order.status == -1" :data-id="order.id" :data-amount='order.amountReal'>退换货</div> -->
-        </div>
-      </div>
+      </van-list>
     </div>
   </div>
+
   <Tabbar />
   
 </template>

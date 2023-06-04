@@ -71,8 +71,9 @@ const readConfigVal = () => {
 }
 
 const gotoAssets = () => {
-  router.push('/assets')
+  router.push('/asset')
 }
+// TODO:关注公众号
 
 onMounted(() => {
   readConfigVal()
@@ -97,6 +98,9 @@ onMounted(() => {
           <div class="uid">用户ID: {{ user.userData.base.id }}</div>
           <div class="nick" @click="nickShow = true">{{ user.userData.base.nick ? user.userData.base.nick : '点击设置昵称' }}</div>
         </div>
+      </div>
+      <div class="header-box-right">
+        <van-tag>关注公众号</van-tag>
       </div>
     </div>
     <div class="asset">
@@ -129,6 +133,7 @@ onMounted(() => {
       <van-cell title="个人信息" />
       <van-cell title="系统设置" is-link @click="router.push('/settings')" />
     </van-cell-group>
+    <div id="mineDebug" style="height: 100px;"></div>
   </div>
   <Tabbar />
   <van-dialog

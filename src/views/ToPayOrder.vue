@@ -47,7 +47,7 @@ const remark = ref<string>('')
 const amountInfo = ref<any>({})
 const btnLoading = ref<boolean>(false)
 const showArea = ref<boolean>(false)
-const areaCOde = ref<string>('')
+const areaCode = ref<string>('')
 const areaSelectedText = ref<string>('')
 const preorderInfo = reactive<any>({
 })
@@ -59,11 +59,15 @@ const data = reactive<any>({
     idcard: '',
     address: ''
   },
+  virtualGoodsInfo: {
+    mobile: ''
+  },
   areaCodeList: []
 })
 const isLogined = ref<boolean>(true)
 
 let formInstance: any = null
+const formRef = ref(null)
 
 const user = useUserStore()
 
@@ -89,6 +93,7 @@ const onAreaConfirm = (selectedValues: any) => {
   console.log(selectedValues)
   areaSelectedText.value = selectedValues.selectedOptions?.map((val: any) => val.text).join('，')
   data.areaCodeList = selectedValues.selectedOptions?.map((val: any) => val.value)
+  showArea.value = false
 }
 
 const isNeedLogistics = computed(() => {
@@ -144,6 +149,7 @@ const processAfterCreateOrder = (orderInfo: any) => {
     }
   } else {
     // 无余额
+    //TODO:0元商品 + 积分，购买时提示金额错误？
     wxpay('order', amountReal, orderId, router, "/order");
 
   }
@@ -174,7 +180,7 @@ const createOrder = async (preorder: boolean) => {
     // cardId: this.data.cardId // 会员卡记录id
   
   }
-  if(isNeedLogistics) {
+  if(isNeedLogistics.value) {
     postData.peisongType = data.peisongType
     postData.provinceId = data.areaCodeList[0]
     postData.cityId = data.areaCodeList[1]
@@ -183,6 +189,8 @@ const createOrder = async (preorder: boolean) => {
     postData.linkMan = data.recipientInfo.linkMan
     postData.mobile = data.recipientInfo.mobile
     postData.idcard = data.recipientInfo.idcard
+  } else {
+    postData.mobile = data.virtualGoodsInfo.mobile
   }
 
   if (preorder) {
@@ -215,17 +223,23 @@ const createOrder = async (preorder: boolean) => {
 }
 
 const goCreateOrder = () => {
-  formInstance.ctx.$refs.form.validate().then(() => {
-    // 检测实名认证状态
-    if(wx.getStorage('needIdCheck') == 1) {
-      // 先不处理实名认证
-    }
+  if(wx.getStorage('needIdCheck') == 1) {
+    // 先不处理实名认证
+  }
+  (formRef.value as any).validate().then(() => {
     createOrder(false)
   })
+  // 这里有个奇怪的问题，正式环境这里报错，formInstance.ctx.$refs undefined
+  // formInstance.ctx.$refs.form.validate().then(() => {
+  //   // 检测实名认证状态
+  //   createOrder(false)
+  // })
+
 }
 
 onMounted(() => {
-  formInstance = getCurrentInstance()
+  // formInstance = getCurrentInstance()
+  wx.configByurl(location.href, ['chooseWXPay'])
   user.checkHasLogined().then(async (_isLogined: boolean) => {
     if (_isLogined) {
       isLogined.value = _isLogined
@@ -237,6 +251,12 @@ onMounted(() => {
     }
   })
 })
+
+const actions =  [
+      { text: '选项一' },
+      { text: '选项二' },
+      { text: '选项三' },
+    ]
 </script>
 
 <template>
@@ -272,7 +292,7 @@ onMounted(() => {
       </div>
       <div class="container-box cell-group">
         <div class="peisong-way">
-          <van-form ref="form" >
+          <van-form ref="formRef" >
             <van-cell-group v-if="!!isNeedLogistics">
               <van-cell title="配送方式">
                 <template #value>
@@ -308,14 +328,19 @@ onMounted(() => {
               />
               <van-cell class="area-cell"  @click="showArea = !showArea" title="收货地址" is-link error-message="111" :error="true">
                 <template  #value>
-                  <span v-if="!areaCOde">请选择</span>
+                  <span v-if="!areaCode">请选择</span>
                   <span v-else>{{ areaSelectedText }}</span>
                   <van-popup
+                    teleport="body"
                     required
+                    round
                     v-model:show="showArea"
                     position="bottom"
+                    :close-on-click-overlay="true"
+                    safe-area-inset-bottom
                   >
-                    <van-area v-model="areaCOde" :area-list="areaList" @confirm="onAreaConfirm" />
+                    <!-- <div style="height: 200px;">11</div> -->
+                    <van-area v-model="areaCode" :area-list="areaList" @confirm="onAreaConfirm" @cancel="showArea = false" />
                   </van-popup>
                 </template>
               </van-cell>
@@ -327,15 +352,42 @@ onMounted(() => {
                 placeholder="请输入详细地址"
                 :rules="[{ required: true, message: '请输入详细地址' }]"
               />
+              <van-field
+                v-model="remark"
+                style="padding-left: 24px;"
+                label="备注"
+                placeholder="如需备注请输入"
+              />
             </van-cell-group>
-            <van-field
-              v-model="remark"
-              style="padding-left: 24px;"
-              label="备注"
-              placeholder="如需备注请输入"
-            />
+            <van-cell-group v-else>
+              <van-field
+                v-model="data.virtualGoodsInfo.mobile"
+                name="rechargeMobile"
+                required
+                label="充值手机"
+                placeholder="请输入充值手机号"
+                :error-message="''"
+                :rules="[{ required: true, message: '请输入充值手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '请输入正确格式手机号' }]"
+              />
+              <van-field
+                v-model="remark"
+                style="padding-left: 24px;"
+                label="备注"
+                placeholder="如需备注请输入"
+              />
+            </van-cell-group>
           </van-form>
+
         </div>
+      </div>
+      <div class="card recharge-explain">
+        <van-icon class="icon-desc" name="description"></van-icon>
+        <span class="title">充值说明</span>
+        <ul>
+          <li>1、支持中国移动，中国电信，中国联通</li>
+          <li>2、0-48小时到账</li>
+          <li>3、充值失败会退款</li>
+        </ul>
       </div>
       <!-- <div class="bottom-box"></div> -->
       <van-submit-bar 
@@ -676,6 +728,24 @@ form {
     margin-right: 2px;
     color: var(--van-field-required-mark-color);
     content: "*";
+  }
+}
+
+// TODO: to be global
+.card {
+  padding: var(--van-cell-vertical-padding) var(--van-cell-horizontal-padding);
+  background-color: #fff;
+  .icon-desc {
+    font-size: 16px;
+  }
+  .title {
+    font-weight: 600;
+    margin-left: 6px;
+  }
+
+  li {
+    color: #666;
+    line-height: 30px;
   }
 }
 </style>

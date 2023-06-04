@@ -97,32 +97,60 @@ export function wxpay(type: string, money: number, orderId: number, router: Rout
   if (postData.nextAction) {
     postData.nextAction = JSON.stringify(postData.nextAction);  
   }
-  const url = wx.getStorage('wxpay_api_url')
+  // const url = wx.getStorage('wxpay_api_url')   // 错了
   // 调webapi通用或具体的pay api皆可
-  WEBAPI.payVariableUrl(url ? url : '/pay/wx/jsapi', postData).then(function(res: any) {
+  // WEBAPI.payVariableUrl('/pay/wx/jsapi', postData).then(function(res: any) {
+  WEBAPI.wxpayJsapi(postData).then(function(res: any) {
     if (res.code == 0) {
       // 收到接口返回以后，使用WeixinJSBridge调用发起支付 or jssdk
-      // 发起支付
-      wx.chooseWXPay({
-        timeStamp: res.data.timeStamp,
-        nonceStr: res.data.nonceStr,
-        package: res.data.package,
-        signType: res.data.signType,
-        paySign: res.data.paySign,
-        success: function() {
-          showSuccessToast('支付成功')
-          router.push(redirectUrl)
-        },
-        fail: function(error: any) {
-          console.log(error)
-          showFailToast('支付失败' + JSON.stringify(error))
+      // 发起支付，两种方法都可以
+  
+      // console.log(wxpayConfig)
+      // @ts-ignore
+      window.WeixinJSBridge.invoke('getBrandWCPayRequest', {
+        'appId': res.data.appid,
+        'timeStamp': res.data.timeStamp,
+        'nonceStr': res.data.nonceStr,
+        'package': 'prepay_id=' + res.data.prepayId,
+        'signType': 'MD5',
+        'paySign': res.data.sign
+      },
+      function(res: any) {
+        if (res.err_msg === 'get_brand_wcpay_request:ok') {
+          // this.$router.replace({ path: '/order-detail', query: { id: orderId }})
         }
+        router.push(redirectUrl)
       })
+
+      // let wxpayConfig = {
+      //   appId: res.data.appid,
+      //   timeStamp: res.data.timeStamp,
+      //   nonceStr: res.data.nonceStr,
+      //   package: 'prepay_id=' + res.data.prepayId,
+      //   signType: res.data.signType,
+      //   paySign: res.data.sign,
+      // }
+      // wx.chooseWXPay({
+      //   ...wxpayConfig,
+      //   success: function() {
+      //     showSuccessToast('支付成功')
+      //     router.push(redirectUrl)
+      //   },
+      //   fail: function(error: any) {
+      //     console.log(error)
+      //     showFailToast('支付失败' + error.msg || error.message)
+      //     router.push(redirectUrl)
+
+      //   }
+      // })
+
     } else {
       showConfirmDialog({
         title: '出错了',
         message: JSON.stringify(res),
         showCancelButton: false
+      }).then(() => {
+        router.push(redirectUrl)
       })
     }
   })

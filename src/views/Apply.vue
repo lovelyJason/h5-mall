@@ -55,7 +55,7 @@ const goForm = () => {
 
 <template>
   <div style="overflow: hidden;">
-    <Topbar title="申请成为分销商" />
+    <Topbar title="申请成为分销商" v-if="!isInWechat" />
     <div class="noApply" v-if="applyStatus == -1">
       <van-empty description="诚邀您成为分销商" />
       <div class="block-btn">

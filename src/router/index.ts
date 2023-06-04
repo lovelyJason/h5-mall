@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 // import { useUserStore } from '@/stores/user'; // store在router之前注册的，不能这么用
 import { checkHasLogined, redirectToWechatAuth, getNewToken } from '@/utils/auth'
-import { showFailToast } from 'vant';
+import { showFailToast, showToast } from 'vant';
 
 // const user = useUserStore()
 
@@ -42,10 +42,18 @@ const router = createRouter({
       component: () => import('../views/OrderList.vue')
     },
     {
+      path: '/order-detail',
+      name: 'orderDetail',
+      meta: {
+        title: '订单详情'
+      },
+      component: () => import('../views/OrderDetail.vue')
+    },
+    {
       path: '/apply',
       name: 'apply',
       meta: {
-        title: '申请分销商'
+        title: '申请成为分销商'
       },
       component: () => import('../views/Apply.vue')
     },
@@ -92,7 +100,7 @@ const router = createRouter({
       path: '/settings/aboutus',
       name: 'aboutus',
       meta: {
-        title: '关于我'
+        title: '关于我们'
       },
       component: () => import('../views/Aboutus.vue')
     },
@@ -104,13 +112,18 @@ const router = createRouter({
     {
       path: '/apply/form',
       name: 'applyForm',
+      meta: {
+        title: '申请分销商',
+        auth: true
+      },
       component: () => import('../views/ApplyForm.vue')
     },
     {
       path: '/myusers',
       name: 'myusers',
       meta: {
-        title: '我的团队'
+        title: '我的团队',
+        auth: true
       },
       component: () => import('../views/MyUsers.vue')
     },
@@ -118,7 +131,8 @@ const router = createRouter({
       path: '/myusers-detail',
       name: 'myusers-detail',
       meta: {
-        title: '会员信息'
+        title: '会员信息',
+        auth: true
       },
       component: () => import('../views/MyUsersDetail.vue')
     },
@@ -126,7 +140,8 @@ const router = createRouter({
       path: '/commision-orderlist',
       name: 'commision-orderlist',
       meta: {
-        title: '推广订单'
+        title: '推广订单',
+        auth: true
       },
       component: () => import('../views/CommisionOrderList.vue')
     },
@@ -134,17 +149,28 @@ const router = createRouter({
       path: '/distribution',
       name: 'distribution',
       meta: {
-        title: '分销中心'
+        title: '分销中心',
+        auth: true
       },
       component: () => import('../views/distribution/Distribution.vue')
     },
     {
-      path: '/assets',
-      name: 'assets',
+      path: '/asset',
+      name: 'asset',
       meta: {
-        title: '资产'
+        title: '资产',
+        auth: true
       },
-      component: () => import('../views/Assets.vue')
+      component: () => import('../views/Asset.vue')
+    },
+    {
+      path: '/withdrawal',
+      name: 'withdrawal',
+      meta: {
+        title: '资产',
+        auth: true
+      },
+      component: () => import('../views/Withdrawal.vue')
     }
   ]
 })
@@ -169,9 +195,13 @@ router.beforeEach(async (to, from) => {
       }
 
     }
-    // 至此任意path携带t参数就可以完成邀请，但是只有auth: true的才会wxmpAuth
+    // 至此任意path携带t参数就可以完成邀请，但是只有auth: true的路由页才会wxmpAuth
     // 如http://127.0.0.1:5173/mine?t=eyJpZCI6ODQ3MzUwOH0=
-    await getNewToken(req) // 这个code只能用一次，下一次就是500
+    let res = await getNewToken(req) // 这个code只能用一次，下一次就是500
+    if(res.code !== 0) {
+      // alert(res.msg)
+      showFailToast(res.msg)
+    }
     delete newQuery.code
     delete newQuery.t
     // replace了也会触发一次导航守卫
@@ -184,8 +214,11 @@ router.beforeEach(async (to, from) => {
       // TODO:怎么在router中访问pinia是个问题
       let isLogined = await checkHasLogined()
       if(!isLogined) {
-        let redirect_url = encodeURI(location.href)
-        redirectToWechatAuth(false, redirect_url) // ③
+        showToast('检测到您未登录，正在为您登录中...')
+        setTimeout(() => {
+          let redirect_url = location.href  // 等于from的地址
+          redirectToWechatAuth(false, redirect_url) // ③
+        }, 800)
       } else {
         return true
       }

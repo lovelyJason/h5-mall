@@ -3,6 +3,7 @@ import Tabbar from '@/components/Tabbar.vue'
 import wx from '@/lib/wx';
 import { ref, reactive, onMounted, inject, toRefs } from 'vue'
 import { useRouter } from 'vue-router';
+import { showFailToast } from 'vant';
 
 export interface GoodsListReq {
   categoryId?: string
@@ -31,6 +32,9 @@ const categorySelected = reactive<any>({
 })
 const firstCategories = reactive<Array<any>>([])
 const currentGoods = reactive<Array<any>>([])
+const data = reactive<any>({
+  banners: []
+})
 
 const categories = async () => {
   // wx.showLoading({
@@ -149,14 +153,32 @@ const gotoGoodsDetail = (e: any ,id: string | number) => {
   router.push('/goods-detail?id=' + id)
 }
 
+const getBanners = async () => {
+  const res = await WEBAPI.banners({
+    type: 'index'
+  })
+  if (res.code == 700) {
+    showFailToast('请在后台添加 banner 轮播图片，自定义类型填写 index')
+  } else {
+    data.banners = res.data
+  }
+}
+
 onMounted(() => {
+  getBanners()
   categories()
 })
 
 </script>
-
 <template>
   <main>
+    <div v-if="data.banners.length > 0" class="swiper-container">
+      <van-swipe class="my-swipe swiper1" :autoplay="6000" indicator-color="white">
+        <van-swipe-item v-for="item in data.banners" :key="item.id">
+          <img mode="aspectFill" bindtap="tapBanner" :data-url="item.linkUrl" :src="item.picUrl" />
+        </van-swipe-item> 
+      </van-swipe>
+    </div>
     <van-search @clear="onSearchClear" clearable @search="searchGoodes" v-model="searchValue" placeholder="请输入搜索关键词" />
     <van-row  justify="space-between">
       <van-col class="category-col left" span="6">
@@ -168,6 +190,7 @@ onMounted(() => {
       <van-col class="product-col right" span="16">
         <van-empty v-if="!currentGoods" description="暂无商品" />
         <van-card
+          style="border-radius: 6px;"
           @click="gotoGoodsDetail($event, item.id)"
           v-for="item in currentGoods"
           :key="item.id"
@@ -198,6 +221,22 @@ main {
   .van-sidebar {
     width: 100%;
   }
+  .swiper-container {
+    width: 100%;
+    // height: 375rpx;
+    height: convertRpxToVw(220);
+    position: relative;
+    z-index: 1;
+    .swiper1 {
+      width: 100%;
+      height: convertRpxToVw(220);
+      img {
+        width: 100%;
+        height: convertRpxToVw(220);
+        object-fit: scale-down;
+      }
+    }
+  }
 }
 .category-col, .product-col {
   /* background-color: #fff; */
@@ -213,7 +252,7 @@ main {
 ;
 }
 .left, .right {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 120px - 29vw); // 上面增加了内容这里要缩短否则滚动条出现
   overflow: auto;
 }
 .prod-card-footer-order {

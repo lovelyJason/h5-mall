@@ -24,13 +24,14 @@ export async function checkHasLogined() {
  */
 export const redirectToWechatAuth = (silent, redirect_uri, state) => {
   state = state || 'STATE'
-  let appid = 'wx57cc82fcf2f0c868'
+  let appid = import.meta.env.VITE_APP_ID
   let scope = silent ? 'snsapi_base' : 'snsapi_userinfo'
   // redirect_uri需要urlEncode处理
   if(redirect_uri) {
     redirect_uri = encodeURI(redirect_uri) 
   } else {
-    redirect_uri = 'http%3A%2F%2F127.0.0.1:5173/order?t=eyJpZCI6ODQ3MzUwOH0='
+    // '{"id":8473508}'
+    redirect_uri = 'http%3A%2F%2F127.0.0.1:5173/mine?t=eyJpZCI6ODQ3MzUwOH0='
     // redirect_uri = 'http://127.0.0.1:5173/order?t=eyJpZCI6ODQ3MzUwOH0='
   }
   location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=${scope}&state=${state}#wechat_redirect`
@@ -39,17 +40,21 @@ export const redirectToWechatAuth = (silent, redirect_uri, state) => {
 
 export async function getNewToken(data) {
   // const wxcode = route.query.code
-  const authIno = await WEBAPI.wxmpAuth(data)
-  if(authIno.code != 0) return null
-  const token = authIno.data.token
-  localStorage.setItem('token', token)
-  return token 
+  const authInfo = await WEBAPI.wxmpAuth(data)
+  if(authInfo.code != 0) {
+
+  } else {
+    const token = authInfo.data.token
+    localStorage.setItem('token', token)
+  }
+  return authInfo 
 }
 
 export const wxWebpageLogin = async (router) => {
   // 1.重定向到微信授权页，静默或非静默
   const route = router.currentRoute.value
   try {
+    // '{"id":8473508}'
     // ?t=eyJpZCI6ODQ3MzUwOH0= 一串base64编码，含有邀请人的用户编号
     const params = JSON.parse(window.atob(route.query.t))
     let data  = {

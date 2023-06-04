@@ -49,13 +49,16 @@ export const useUserStore = defineStore('user', () => {
     return true
   }
 
-  async function getNewToken(data: WxmpAuthRequest): Promise<string | null> {
+  async function getNewToken(data: WxmpAuthRequest): Promise<any> {
     // const wxcode = route.query.code
-    const authIno = await WEBAPI.wxmpAuth(data)
-    if(authIno.code != 0) return null
-    const token = authIno.data.token
-    localStorage.setItem('token', token)
-    return token 
+    const authInfo = await WEBAPI.wxmpAuth(data)
+    if(authInfo.code != 0) {
+
+    } else {
+      const token = authInfo.data.token
+      localStorage.setItem('token', token)
+    }
+    return authInfo
   }
   // 要保证调用之前token是有效的
   async function getUserApiInfo(): Promise<object | null> {

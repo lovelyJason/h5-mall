@@ -22,7 +22,7 @@ onMounted(() => {
 
 <template>
   <div class="page">
-    <Topbar title="关于我们" />
+    <Topbar title="关于我们" v-if="!isInWechat" />
     <van-empty v-if="!cmsPageDetail.id" description="请在后台添加内容" />
     <div v-else class="content">
       <div v-html="cmsPageDetail.content"></div>

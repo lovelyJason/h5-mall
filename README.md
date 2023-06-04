@@ -187,3 +187,9 @@ const { code, data: SignType } = res
 ## 一些变更
 
 WEBAPI.goodsDetail，即shop/goods/detail接口入参少了token参数
+
+## 项目运行
+
+node版本：目前18.12.0可以运行
+
+新建.env.local，配置VITE_APP_ID
