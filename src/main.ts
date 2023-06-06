@@ -22,7 +22,6 @@ import {
   Form,
   Field,
   SubmitBar,
-  Dialog,
   Divider,
   Sticky,
   Stepper,
@@ -35,7 +34,8 @@ import {
   Radio,
   Popup,
   List,
-  Tag
+  Tag,
+  Dialog
 } from 'vant'
 // 2. 引入组件样式
 import 'vant/lib/index.css'

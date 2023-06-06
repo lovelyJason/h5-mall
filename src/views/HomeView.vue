@@ -188,7 +188,7 @@ onMounted(() => {
         </van-sidebar>
       </van-col>
       <van-col class="product-col right" span="16">
-        <van-empty v-if="!currentGoods" description="暂无商品" />
+        <van-empty v-if="!currentGoods.length" description="暂无商品" />
         <van-card
           style="border-radius: 6px;"
           @click="gotoGoodsDetail($event, item.id)"

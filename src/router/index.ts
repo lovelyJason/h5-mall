@@ -62,7 +62,7 @@ const router = createRouter({
       name: 'mine',
       meta: {
         title: '会员中心',
-        auth: true
+        auth: false
       },
       component: () => import('../views/Mine.vue')
     },

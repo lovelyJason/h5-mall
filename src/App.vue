@@ -1,5 +1,26 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { watch, inject } from 'vue';
+import { useRouter, useRoute, RouterView } from 'vue-router'
+import { showFailToast } from 'vant';
+
+const router = useRouter()
+const route = useRoute()
+const wx: any = inject('wx')
+
+// 邀请码参数：t=eyJpZCI6ODQ3MzUwOH0=
+watch(route, () => {
+  const query = route.query
+  if(query.t) {
+    try {
+      const params = JSON.parse(window.atob(query.t as string))
+      console.log(params)
+      const inviter_id = params.id
+      wx.setStorage('referrer', inviter_id)
+    } catch (error) {
+      showFailToast('邀请链接非法')
+    }
+  }
+})
 </script>
 
 <template>

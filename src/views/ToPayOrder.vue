@@ -380,7 +380,7 @@ const actions =  [
 
         </div>
       </div>
-      <div class="card recharge-explain">
+      <div v-if="!isNeedLogistics" class="card recharge-explain">
         <van-icon class="icon-desc" name="description"></van-icon>
         <span class="title">充值说明</span>
         <ul>

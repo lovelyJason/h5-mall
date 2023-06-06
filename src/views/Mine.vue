@@ -5,6 +5,7 @@ import { ref, reactive, inject, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
 import { showSuccessToast, showFailToast, showToast } from 'vant';
 import { useUserStore } from '@/stores/user';
+import { checkHasLogined, redirectToWechatAuth, getNewToken } from '@/utils/auth'
 
 const $WEBAPI: any = inject('$WEBAPI')
 const wx: any = inject('wx')
@@ -15,6 +16,7 @@ const route = router.currentRoute.value
 
 const amountInfo = reactive<any>({})
 const nickShow = ref(false)
+const showQRCode = ref(false)
 const nick = ref('')
 const config = reactive<any>({
   order_hx_uids: '',
@@ -74,6 +76,14 @@ const gotoAssets = () => {
   router.push('/asset')
 }
 // TODO:关注公众号
+const openDialog = () => {
+  showQRCode.value = true
+}
+
+const login = () => {
+  let redirect_url = location.href  // 等于from的地址
+  redirectToWechatAuth(false, redirect_url) 
+}
 
 onMounted(() => {
   readConfigVal()
@@ -92,15 +102,22 @@ onMounted(() => {
   <div class="mine">
     <Topbar v-if="!isInWechat" title="会员中心" :show-back="false" />
     <div class="header-box">
-      <div class="header-box-left">
+      <div v-if="user.userData.base.id" class="header-box-left">
         <div class="avatar" :style="{backgroundImage: `url(${user.userData.base.avatarUrl})`}"></div>
         <div class="r">
           <div class="uid">用户ID: {{ user.userData.base.id }}</div>
           <div class="nick" @click="nickShow = true">{{ user.userData.base.nick ? user.userData.base.nick : '点击设置昵称' }}</div>
         </div>
       </div>
+      <div v-else class="header-box-left">
+        <div @click="login" class="avatar" :style="{backgroundImage: `url(data:image/png;base64,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)`}"></div>
+        <div class="r">
+          <div @click="login" class="login">登录/注册</div>
+        </div>
+      </div>
       <div class="header-box-right">
-        <van-tag>关注公众号</van-tag>
+        <van-button @click="openDialog" size="mini" round type="success">关注公众号</van-button>
+        <van-button v-if="user.userData.base.id" @click="openDialog" size="mini" round type="success">复制推荐码</van-button>
       </div>
     </div>
     <div class="asset">
@@ -150,6 +167,9 @@ onMounted(() => {
       clearable
     />
   </van-dialog>
+  <van-dialog style="width: 300px;height: 360px;" teleport=".mine" v-model:show="showQRCode">
+    <img  style="width: 100%; object-fit: fill;" src="https://cdn.qdovo.com/img/timg.jpeg" />
+  </van-dialog>
 </template>
 
 <style scoped lang="scss">
@@ -167,6 +187,17 @@ onMounted(() => {
 .header-box-left {
   display: flex;
   align-items: center;
+}
+.header-box-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  .van-button {
+    line-height: 24px;
+    margin-left: 0;
+    margin-top: 0.5em;
+  }
 }
 .avatar {
   width: 16vw;
@@ -212,4 +243,5 @@ onMounted(() => {
   height: 0.1vw;
   background: #F4F5F9;
 }
+
 </style>
