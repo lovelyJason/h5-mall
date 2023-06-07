@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import Tabbar from '@/components/Tabbar.vue'
 import Topbar from '@/components/Topbar.vue';
-import { ref, reactive, inject, onMounted } from 'vue'
+import { ref, reactive, inject, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router';
 import { showSuccessToast, showFailToast, showToast } from 'vant';
 import { useUserStore } from '@/stores/user';
 import { checkHasLogined, redirectToWechatAuth, getNewToken } from '@/utils/auth'
+import { generateInvitationLink } from '@/utils';
+import Clipboard from "clipboard";
 
+const btnCopy = new Clipboard("#copyUid");
 const $WEBAPI: any = inject('$WEBAPI')
 const wx: any = inject('wx')
 const WEBAPI = $WEBAPI
@@ -17,6 +20,7 @@ const route = router.currentRoute.value
 const amountInfo = reactive<any>({})
 const nickShow = ref(false)
 const showQRCode = ref(false)
+const isLogined = ref(true)
 const nick = ref('')
 const config = reactive<any>({
   order_hx_uids: '',
@@ -85,15 +89,30 @@ const login = () => {
   redirectToWechatAuth(false, redirect_url) 
 }
 
+const copyInviteLink = () => {
+  showToast({
+    position: 'top',
+    message: '已复制到剪切板，分享给好友吧！'
+  })
+}
+
 onMounted(() => {
+  // wx.configByurl(location.href, ['showAllNonBaseMenuItem'])
+  // wx.ready(() => {
+  // })
   readConfigVal()
-  user.checkHasLogined().then(async (isLogined: boolean) => {
-    if (isLogined) {
+  user.checkHasLogined().then(async (_isLogined: boolean) => {
+    isLogined.value = _isLogined
+    if (_isLogined) {
       Promise.all([user.getUserApiInfo(), userAmount()])
     } else {
      
     }
   })
+})
+
+onBeforeUnmount(() => {
+  btnCopy.destroy()
 })
 
 </script>
@@ -102,7 +121,7 @@ onMounted(() => {
   <div class="mine">
     <Topbar v-if="!isInWechat" title="会员中心" :show-back="false" />
     <div class="header-box">
-      <div v-if="user.userData.base.id" class="header-box-left">
+      <div v-if="isLogined" class="header-box-left">
         <div class="avatar" :style="{backgroundImage: `url(${user.userData.base.avatarUrl})`}"></div>
         <div class="r">
           <div class="uid">用户ID: {{ user.userData.base.id }}</div>
@@ -117,7 +136,17 @@ onMounted(() => {
       </div>
       <div class="header-box-right">
         <van-button @click="openDialog" size="mini" round type="success">关注公众号</van-button>
-        <van-button v-if="user.userData.base.id" @click="openDialog" size="mini" round type="success">复制推荐码</van-button>
+        <van-button 
+          id="copyUid" 
+          v-if="isLogined" 
+          @click="copyInviteLink" 
+          size="mini" 
+          round 
+          type="success"
+          :data-clipboard-text="generateInvitationLink(user.userData.base.id)"
+        >
+          复制推荐码
+        </van-button>
       </div>
     </div>
     <div class="asset">
@@ -167,8 +196,8 @@ onMounted(() => {
       clearable
     />
   </van-dialog>
-  <van-dialog style="width: 300px;height: 360px;" teleport=".mine" v-model:show="showQRCode">
-    <img  style="width: 100%; object-fit: fill;" src="https://cdn.qdovo.com/img/timg.jpeg" />
+  <van-dialog class-name="qdcode-dialog" style="width: 300px;height: 360px;" teleport=".mine" v-model:show="showQRCode">
+    <img  style="width: 100%; object-fit: fill;" src="/images/qrcode_for_gh.jpg" />
   </van-dialog>
 </template>
 
@@ -197,6 +226,11 @@ onMounted(() => {
     line-height: 24px;
     margin-left: 0;
     margin-top: 0.5em;
+  }
+}
+.qdcode-dialog {
+  .van-button__content {
+    color: red;
   }
 }
 .avatar {

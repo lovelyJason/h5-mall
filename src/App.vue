@@ -13,7 +13,6 @@ watch(route, () => {
   if(query.t) {
     try {
       const params = JSON.parse(window.atob(query.t as string))
-      console.log(params)
       const inviter_id = params.id
       wx.setStorage('referrer', inviter_id)
     } catch (error) {

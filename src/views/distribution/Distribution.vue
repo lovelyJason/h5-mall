@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, inject, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user';
-import { showLoadingToast, showToast, showFailToast, showConfirmDialog } from 'vant';
-import Clipboard from "clipboard";
-import { generateInvitationLink } from '@/utils';
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { showLoadingToast, showToast, showFailToast, showConfirmDialog } from 'vant'
+import Clipboard from 'clipboard'
+import { generateInvitationLink } from '@/utils'
+import Poster from './Poster.vue'
 
-const btnCopy = new Clipboard("#copyUid");
+const btnCopy = new Clipboard('#copyUid')
 const router = useRouter()
 const route = router.currentRoute.value
 const user = useUserStore()
@@ -14,6 +15,7 @@ const $WEBAPI: any = inject('$WEBAPI')
 const WEBAPI = $WEBAPI
 const wx: any = inject('wx')
 
+const showQRCode = ref(true)
 const data = reactive<any>({
   fxCommisionPaying: '',
   freeze: null,
@@ -28,9 +30,7 @@ const data = reactive<any>({
     thisMonthXiaoshou: 0,
     lastMonthXiaoshou: 0
   },
-  fxIndexAdPos: {
-
-  },
+  fxIndexAdPos: {},
   fxCities: [],
   canvasHeight: 0,
   applyStatus: null,
@@ -39,28 +39,31 @@ const data = reactive<any>({
 
 Date.prototype.format = function (content: any) {
   var date = {
-    "M+": this.getMonth() + 1,
-    "d+": this.getDate(),
-    "h+": this.getHours(),
-    "m+": this.getMinutes(),
-    "s+": this.getSeconds(),
-    "q+": Math.floor((this.getMonth() + 3) / 3),
-    "S+": this.getMilliseconds()
-  };
+    'M+': this.getMonth() + 1,
+    'd+': this.getDate(),
+    'h+': this.getHours(),
+    'm+': this.getMinutes(),
+    's+': this.getSeconds(),
+    'q+': Math.floor((this.getMonth() + 3) / 3),
+    'S+': this.getMilliseconds()
+  }
   if (/(y+)/i.test(content)) {
     content = content.replace(RegExp.$1, (this.getFullYear() + '').substr(4 - RegExp.$1.length))
   }
   for (var k in date) {
-    if (new RegExp("(" + k + ")").test(content)) {
+    if (new RegExp('(' + k + ')').test(content)) {
       // @ts-ignore
-      content = content.replace(RegExp.$1, RegExp.$1.length == 1 ? date[k] : ("00" + date[k]).substr(("" + date[k]).length));
+      content = content.replace(
+        RegExp.$1,
+        RegExp.$1.length == 1 ? date[k] : ('00' + date[k]).substr(('' + date[k]).length)
+      )
     }
   }
-  return content;
+  return content
 }
 
 const convertRpxToVw = (point: number) => {
-  return point / 750 * 100 + 'vw'
+  return (point / 750) * 100 + 'vw'
 }
 
 const adPosition = async () => {
@@ -92,18 +95,16 @@ const getAmount = () => {
     }
   })
 }
-
 /**
-  * @params containerDom: 包裹待转化的DOM，
-  * 即本例中的 <div class="container" ref="containerDom">
-  */
+ * @params containerDom: 包裹待转化的DOM，
+ * 即本例中的 <div class="container" ref="containerDom">
+ */
 const makePoster = async (containerDom: HTMLElement | null | undefined) => {
   // let posterUrl = '';
   // if (!containerDom) {
   //   console.error('containerDom为空: ');
   //   return posterUrl;
   // }
- 
   // // 设置配置项，可以在官方文档查
   // const options = {
   //   scale: window.devicePixelRatio, // 放大倍数，消除截图锯齿
@@ -142,7 +143,6 @@ const showCanvas = (qrcode: string) => {
 }
 
 const fetchQrcode = () => {
-  showLoadingToast('加载中')
   // 这是小程序的api
   // WEBAPI.wxaQrcode({
   //   scene: 'inviter_id=' + wx.getStorageSync('uid'),
@@ -205,7 +205,7 @@ const commision = async () => {
   } else {
     month--
   }
-  const lastMonth = year + "" + (month < 10 ? ('0' + month) : month)
+  const lastMonth = year + '' + (month < 10 ? '0' + month : month)
   console.log('上个月', lastMonth)
   let res = await WEBAPI.siteStatisticsSaleroom({
     dateBegin: nowDate.format('yyyyMMdd'),
@@ -246,13 +246,11 @@ const commision = async () => {
   data.commisionData = commisionData
 }
 
-const fxCities = () => {
-
-}
+const fxCities = () => {}
 
 const handleUserInfo = async () => {
   const userData = user.userData
-  commision();
+  commision()
   if (userData.base.isSeller) {
     // 判断是否是市区合伙人
     fxCities()
@@ -266,16 +264,13 @@ const copyContent = (e: any) => {
   })
 }
 
-const saveToMobile = () => {
-
-}
+const saveToMobile = () => {}
 
 onMounted(() => {
   adPosition()
   user.checkHasLogined().then(async (isLogined: boolean) => {
     if (isLogined) {
       await user.getUserApiInfo()
-      console.log(user.userData)
       handleUserInfo()
       getAmount()
       getApplyProcess()
@@ -294,12 +289,15 @@ const gotoAssets = () => {
 onBeforeUnmount(() => {
   btnCopy.destroy()
 })
-
 </script>
 <template>
   <div class="page">
     <div>
-      <img :style="{ width: '100%', height: '206px' }" mode="aspectFit" src="/images/index-top-bg.png" />
+      <img
+        :style="{ width: '100%', height: '206px' }"
+        mode="aspectFit"
+        src="/images/index-top-bg.png"
+      />
     </div>
 
     <!-- 如果当前用户是分销商 -->
@@ -314,49 +312,51 @@ onBeforeUnmount(() => {
             </div>
           </div>
         </div>
-        <div class="header-box2"> </div>
+        <div class="header-box2"></div>
         <div class="line"></div>
         <div class="asset">
-          <div class='item' @click="gotoAssets" :style="{ width: '72px' }">
+          <div class="item" @click="gotoAssets" :style="{ width: '72px' }">
             <div class="Count">{{ data.fxCommisionPaying }}</div>
             <div>未结算金额</div>
           </div>
-          <div class='item' @click="gotoAssets" :style="{ width: '72px' }">
+          <div class="item" @click="gotoAssets" :style="{ width: '72px' }">
             <div class="Count">{{ data.freeze }}</div>
             <div>冻结金额</div>
           </div>
-          <div class='item right' @click="gotoAssets" :style="{ width: '72px' }">
-            <div class="Count" style="color:#FF444A">{{ data.balance }}</div>
+          <div class="item right" @click="gotoAssets" :style="{ width: '72px' }">
+            <div class="Count" style="color: #ff444a">{{ data.balance }}</div>
             <div>可用金额</div>
           </div>
         </div>
         <div class="line"></div>
-        <div class="titleXS">
-          我的业绩
-        </div>
+        <div class="titleXS">我的业绩</div>
         <div class="asset">
-          <div class='item'>
+          <div class="item">
             <div class="Count">{{ data.commisionData.todayXiaoshou }}</div>
             <div>今日销售</div>
             <div class="yjP">{{ data.commisionData.today ? data.commisionData.today : 0 }}</div>
             <div class="yjT">（佣金）</div>
           </div>
-          <div class='item right'>
+          <div class="item right">
             <div class="Count">{{ data.commisionData.yesdayXiaoshou }}</div>
             <div>昨天销售</div>
             <div class="yjP">{{ data.commisionData.yesday ? data.commisionData.yesday : 0 }}</div>
             <div class="yjT">（佣金）</div>
           </div>
-          <div class='item right'>
+          <div class="item right">
             <div class="Count">{{ data.commisionData.thisMonthXiaoshou }}</div>
             <div>本月销售</div>
-            <div class="yjP">{{ data.commisionData.thisMonth ? data.commisionData.thisMonth : 0 }}</div>
+            <div class="yjP">
+              {{ data.commisionData.thisMonth ? data.commisionData.thisMonth : 0 }}
+            </div>
             <div class="yjT">（佣金）</div>
           </div>
-          <div class='item right'>
+          <div class="item right">
             <div class="Count">{{ data.commisionData.lastMonthXiaoshou }}</div>
             <div>上月销售</div>
-            <div class="yjP">{{ data.commisionData.lastMonth ? data.commisionData.lastMonth : 0 }}</div>
+            <div class="yjP">
+              {{ data.commisionData.lastMonth ? data.commisionData.lastMonth : 0 }}
+            </div>
             <div class="yjT">（佣金）</div>
           </div>
         </div>
@@ -366,74 +366,120 @@ onBeforeUnmount(() => {
         <div class="line2"></div>
         <div style="display: flex">
           <img
-            :style="{ width: convertRpxToVw(80), height: convertRpxToVw(80), margin: '10px 20px 0px 0', 'border-radius': '100%' }"
-            :src="user.userData.referrer.avatarUrl" />
+            :style="{
+              width: convertRpxToVw(80),
+              height: convertRpxToVw(80),
+              margin: '10px 20px 0px 0',
+              'border-radius': '100%'
+            }"
+            :src="user.userData.referrer.avatarUrl"
+          />
           <div
-            :style="{ height: convertRpxToVw(120), 'line-height': convertRpxToVw(120), 'font-size': convertRpxToVw(26) }">
-            {{
-              user.userData.referrer.nick }}</div>
+            :style="{
+              height: convertRpxToVw(120),
+              'line-height': convertRpxToVw(120),
+              'font-size': convertRpxToVw(26)
+            }"
+          >
+            {{ user.userData.referrer.nick }}
+          </div>
         </div>
       </div>
-      <img v-if="data.fxIndexAdPos" :src="data.fxIndexAdPos.val" mode="widthFix" class="adpos" :data-url="data.fxIndexAdPos.url" bindtap="goUrl" />
+      <img
+        v-if="data.fxIndexAdPos"
+        :src="data.fxIndexAdPos.val"
+        mode="widthFix"
+        class="adpos"
+        :data-url="data.fxIndexAdPos.url"
+        bindtap="goUrl"
+      />
       <van-cell-group title="分销信息" custom-class="cell-class">
         <van-field v-model="user.userData.base.id" readonly center clearable label="我的邀请码">
           <template #button>
-            <van-button 
+            <van-button
               id="copyUid"
-              slot="button" 
-              size="small" 
-              type="primary" 
-              round 
+              slot="button"
+              size="small"
+              type="primary"
+              round
               bindtap="copyContent"
               :data-id="user.userData.base.id"
               :data-clipboard-text="generateInvitationLink(user.userData.base.id)"
               @click="copyContent"
             >
-            复制
+              复制
             </van-button>
           </template>
         </van-field>
         <van-cell title="我的团队" value="查看" is-link @click="router.push('/myusers')" />
-        <van-cell title="推广订单" value="查看" is-link @click="router.push('/commision-orderlist')" />
-        <van-cell title="账单明细" value="查看" is-link />
+        <van-cell
+          title="推广订单"
+          value="查看"
+          is-link
+          @click="router.push('/commision-orderlist')"
+        />
+        <van-cell title="账单明细" value="查看" is-link @click="router.push('/asset')" />
       </van-cell-group>
 
       <!-- 团队长、副队长 -->
       <van-cell-group
-        v-if="user.userData.saleDistributionTeam && (user.userData.saleDistributionTeam.leader == user.userData.base.id || user.userData.saleDistributionTeam.deputyLeader == user.userData.base.id)"
-        custom-class="cell-class" title="我的团队">
+        v-if="
+          user.userData.saleDistributionTeam &&
+          (user.userData.saleDistributionTeam.leader == user.userData.base.id ||
+            user.userData.saleDistributionTeam.deputyLeader == user.userData.base.id)
+        "
+        custom-class="cell-class"
+        title="我的团队"
+      >
         <van-cell :title="user.userData.saleDistributionTeam.name" />
-        <van-cell title="身份"
-          :value="user.userData.saleDistributionTeam.leader == user.userData.base.id ? '队长' : '副队长'" />
-        <van-cell title="销售目标" :value="'¥' + user.userData.saleDistributionTeam.standardSaleroom + '/月'" />
+        <van-cell
+          title="身份"
+          :value="
+            user.userData.saleDistributionTeam.leader == user.userData.base.id ? '队长' : '副队长'
+          "
+        />
+        <van-cell
+          title="销售目标"
+          :value="'¥' + user.userData.saleDistributionTeam.standardSaleroom + '/月'"
+        />
         <van-cell title="本月销售" :value="'¥' + user.userData.saleDistributionTeam.curSaleroom" />
         <van-cell title="月度报表" is-link />
       </van-cell-group>
 
       <!-- 城市合伙人 -->
-      <van-cell-group v-for="item in data.fxCities" :key="item.id" custom-class="cell-class"
-        :title="item.provinceName + item.cityName + '合伙人'">
+      <van-cell-group
+        v-for="item in data.fxCities"
+        :key="item.id"
+        custom-class="cell-class"
+        :title="item.provinceName + item.cityName + '合伙人'"
+      >
         <van-cell title="销售目标" :value="'¥' + item.standardSaleroom + '/月'" />
         <van-cell title="本月销售" :value="'¥' + item.curSaleroom" />
         <van-cell title="月度报表" is-link />
       </van-cell-group>
 
-      <div class='noApply' style="padding-top: 10px;padding-bottom: 20px">
-        <div class="download-img" style="text-align: center;">
+      <div class="noApply" style="padding-top: 10px; padding-bottom: 20px">
+        <div class="download-img" style="text-align: center">
           <div class="canvas-box">
-            <canvas class="canvas" :style="{ width: data.canvasHeight + 'px', height: data.canvasHeight + 'px' }"
-              canvas-id="firstCanvas"></canvas>
+            <canvas
+              class="canvas"
+              :style="{ width: data.canvasHeight + 'px', height: data.canvasHeight + 'px' }"
+              canvas-id="firstCanvas"
+            ></canvas>
           </div>
-          <div class="tzBtn" @click="saveToMobile" :style="{ 'margin-top': convertRpxToVw(10), background: '#F5D795', padding: `0 ${convertRpxToVw(16)}` }">
+          <!-- <div class="tzBtn" @click="saveToMobile" :style="{ 'margin-top': convertRpxToVw(10), background: '#F5D795', padding: `0 ${convertRpxToVw(16)}` }">
             保存到相册
-          </div>
+          </div> -->
         </div>
       </div>
-
     </div>
 
     <!-- 还不是分销商 -->
-    <div v-if="user.userData.base && !user.userData.base.isSeller" class="tabTop" :style="{ 'margin-top': '192px' }">
+    <div
+      v-if="user.userData.base && !user.userData.base.isSeller"
+      class="tabTop"
+      :style="{ 'margin-top': '192px' }"
+    >
       <div class="header-box">
         <image class="avatar" :src="user.userData.base.avatarUrl" mode="aspectFill"></image>
         <div class="r">
@@ -445,11 +491,12 @@ onBeforeUnmount(() => {
       <div class="line"></div>
       <div class="header-box2" bindtap="goApply">立即前往申请成为分销商 ></div>
     </div>
+    <Poster />
   </div>
 </template>
 <style scoped lang="scss">
 .page {
-  background: #FDF3E7
+  background: #fdf3e7;
 }
 
 .asset {
@@ -463,7 +510,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   text-align: center;
   font-size: convertRpxToVw(26);
-  color: #3F240A;
+  color: #3f240a;
 }
 
 .btn-view {
@@ -515,7 +562,7 @@ onBeforeUnmount(() => {
 .tabTop {
   width: convertRpxToVw(710);
   /* height: 500rpx; */
-  background: linear-gradient(270deg, #F6C173 0%, #FFECC0 100%);
+  background: linear-gradient(270deg, #f6c173 0%, #ffecc0 100%);
   border-radius: convertRpxToVw(20);
   margin-left: convertRpxToVw(20);
   /* margin-top: -380rpx; */
@@ -528,7 +575,7 @@ onBeforeUnmount(() => {
   margin-top: 10px;
   width: convertRpxToVw(710);
   /* height: 500rpx; */
-  background: linear-gradient(270deg, #F6C173 0%, #FFECC0 100%);
+  background: linear-gradient(270deg, #f6c173 0%, #ffecc0 100%);
   border-radius: convertRpxToVw(20);
   margin-left: convertRpxToVw(20);
   /* margin-top: -380rpx; */
@@ -556,7 +603,7 @@ onBeforeUnmount(() => {
   font-size: convertRpxToVw(26);
   font-family: PingFangSC-Regular, PingFang SC;
   font-weight: 400;
-  color: #3E240D;
+  color: #3e240d;
 }
 
 .header-box .avatar {
@@ -586,7 +633,7 @@ onBeforeUnmount(() => {
 .line {
   width: convertRpxToVw(558);
   height: 2px;
-  background: linear-gradient(90deg, #FFFFFF 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
   border-radius: 1px;
   margin-left: 20px;
 }
@@ -596,7 +643,7 @@ onBeforeUnmount(() => {
   height: convertRpxToVw(56);
 
   border-radius: 28px;
-  border: convertRpxToVw(2) solid #3F240A;
+  border: convertRpxToVw(2) solid #3f240a;
   line-height: convertRpxToVw(56);
   position: absolute;
   right: 16px;
@@ -610,7 +657,7 @@ onBeforeUnmount(() => {
   line-height: convertRpxToVw(70);
   margin: auto;
   border-radius: 28px;
-  border: convertRpxToVw(2) solid #3F240A;
+  border: convertRpxToVw(2) solid #3f240a;
   right: 16px;
   text-align: center;
   font-size: 14px;
@@ -622,23 +669,23 @@ onBeforeUnmount(() => {
   font-size: convertRpxToVw(40);
   font-family: PingFangSC-Medium, PingFang SC;
   font-weight: 500;
-  color: #3F240A;
+  color: #3f240a;
   line-height: 38px;
 }
 
 .tuan {
   margin-left: convertRpxToVw(20);
   margin-right: convertRpxToVw(20);
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: convertRpxToVw(8);
   // padding: convertRpxToVw(40);
-  padding: convertRpxToVw(40) convertRpxToVw(40) convertRpxToVw(20) convertRpxToVw(40)
+  padding: convertRpxToVw(40) convertRpxToVw(40) convertRpxToVw(20) convertRpxToVw(40);
 }
 
 .tuan2 {
   margin-left: convertRpxToVw(20);
   width: convertRpxToVw(630);
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: convertRpxToVw(8);
   padding: convertRpxToVw(26) 40rpx;
 }
@@ -646,7 +693,7 @@ onBeforeUnmount(() => {
 .line2 {
   width: convertRpxToVw(630);
   height: 1px;
-  background: #E6E6E6;
+  background: #e6e6e6;
   border-radius: 1px;
   margin-top: convertRpxToVw(20);
 }
@@ -654,7 +701,7 @@ onBeforeUnmount(() => {
 .tuanItem {
   width: convertRpxToVw(315);
   text-align: center;
-  padding-top: convertRpxToVw(42)
+  padding-top: convertRpxToVw(42);
 }
 
 .tI1 {
@@ -673,7 +720,7 @@ onBeforeUnmount(() => {
 }
 
 .yqCode {
-  background: #F2F5FF;
+  background: #f2f5ff;
   height: convertRpxToVw(37);
   font-size: convertRpxToVw(26);
   font-family: PingFangSC-Medium, PingFang SC;
@@ -687,7 +734,7 @@ onBeforeUnmount(() => {
 .cybtn {
   width: convertRpxToVw(140);
   height: convertRpxToVw(50);
-  background: #FFD43E;
+  background: #ffd43e;
   border-radius: 28px;
   line-height: convertRpxToVw(50);
   text-align: center;
@@ -699,7 +746,7 @@ onBeforeUnmount(() => {
   font-size: convertRpxToVw(26);
   font-family: PingFangSC-Regular, PingFang SC;
   font-weight: 400;
-  color: #FF444A;
+  color: #ff444a;
   line-height: convertRpxToVw(37);
 }
 
@@ -718,10 +765,10 @@ onBeforeUnmount(() => {
   font-size: convertRpxToVw(28);
   /* font-family: PingFangSC-Medium, PingFang SC; */
   /* font-weight: 400; */
-  color: #3F240A;
+  color: #3f240a;
   line-height: convertRpxToVw(40);
   margin-left: 22px;
-  margin-top: 10px
+  margin-top: 10px;
 }
 
 .textsjtz {
@@ -740,7 +787,6 @@ onBeforeUnmount(() => {
   position: absolute;
   right: 20px;
 }
-
 
 /* -----------商品列表------------- */
 .goods-container {

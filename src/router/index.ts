@@ -3,7 +3,7 @@ import HomeView from '../views/HomeView.vue'
 // import { useUserStore } from '@/stores/user'; // store在router之前注册的，不能这么用
 import { checkHasLogined, redirectToWechatAuth, getNewToken } from '@/utils/auth'
 import { showFailToast, showToast } from 'vant';
-
+import wx from '@/lib/wx';
 // const user = useUserStore()
 
 const router = createRouter({
@@ -189,12 +189,19 @@ router.beforeEach(async (to, from) => {
       try {
         const params = JSON.parse(window.atob(to.query.t as string))
         req.referrer = params.id
+        // wx.setStorage('referrer', params.id) // app.vue里watch过了
       } catch (error) {
         // 邀请参数非法
         showFailToast('参数非法')
       }
 
+    } else {
+      let referrer = wx.getStorage('referrer')
+      if(referrer) {
+        req.referrer = referrer
+      }
     }
+    console.log('wxmpAuth req', req)
     // 至此任意path携带t参数就可以完成邀请，但是只有auth: true的路由页才会wxmpAuth
     // 如http://127.0.0.1:5173/mine?t=eyJpZCI6ODQ3MzUwOH0=
     let res = await getNewToken(req) // 这个code只能用一次，下一次就是500
@@ -202,8 +209,8 @@ router.beforeEach(async (to, from) => {
       // alert(res.msg)
       showFailToast(res.msg)
     }
-    delete newQuery.code
-    delete newQuery.t
+    delete newQuery.code  // 否则会死循环
+    // delete newQuery.t
     // replace了也会触发一次导航守卫
     return {
       path,

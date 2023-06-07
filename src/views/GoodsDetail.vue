@@ -121,9 +121,19 @@ const openCustomerService = () => {
 
 const shareGoods = () => {
   showToast('开发中')
+  // wx.updateAppMessageShareData({ 
+  //   title: '我分享了一个商品', // 分享标题
+  //   desc: '进来购买', // 分享描述
+  //   link: 'https://mall.qdovo.com', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+  //   imgUrl: 'https://cdn.qdovo.com/img/timg.jpeg', // 分享图标
+  //   success: function () {
+  //     // 设置成功
+  //   }
+  // })
 }
 
 onMounted(() => {
+  wx.configByurl(location.href, ['updateAppMessageShareData'])
   // 商品id携带在query.id
   // 读取分享链接中的邀请人编号,但是如果之前已经被邀请过了还是不用再换绑了
   // TODO:如果用户在后台没有数据，为其注册，并绑定邀请人
@@ -199,15 +209,16 @@ onMounted(() => {
               </div>
             </div>
             <div class="goods-info-fx">
-              <div class='item left' @click="shareGoods">
+              <!-- TODO:分享无效 -->
+              <!-- <div class='item left' @click="shareGoods">
                 <van-icon name="share-o" size="24px" />
                 <div class="icon-title">分享</div>
                 <button></button>
-              </div>
-              <div class='item' bindtap="drawSharePic">
+              </div> -->
+              <!-- <div class='item' bindtap="drawSharePic">
                 <van-icon name="qr" size="24px"/>
                 <div class="icon-title">二维码</div>            
-              </div>
+              </div> -->
             </div>
           </div>
           <div class="goods-title">{{ data.goodsDetail.basicInfo.name }}</div>

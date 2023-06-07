@@ -172,7 +172,7 @@ onMounted(() => {
 </script>
 <template>
   <main>
-    <div v-if="data.banners.length > 0" class="swiper-container">
+    <div class="swiper-container">
       <van-swipe class="my-swipe swiper1" :autoplay="6000" indicator-color="white">
         <van-swipe-item v-for="item in data.banners" :key="item.id">
           <img mode="aspectFill" bindtap="tapBanner" :data-url="item.linkUrl" :src="item.picUrl" />
