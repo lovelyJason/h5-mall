@@ -196,9 +196,6 @@ onBeforeUnmount(() => {
       clearable
     />
   </van-dialog>
-  <van-dialog class-name="qdcode-dialog" style="width: 300px;height: 360px;" teleport=".mine" v-model:show="showQRCode">
-    <img  style="width: 100%; object-fit: fill;" src="/images/qrcode_for_gh.jpg" />
-  </van-dialog>
 </template>
 
 <style scoped lang="scss">

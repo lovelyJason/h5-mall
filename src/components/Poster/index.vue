@@ -1,13 +1,48 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from 'vue';
+import { ref, reactive, onMounted, nextTick, watch } from 'vue';
 import QRCode from 'qrcodejs2'
 import html2canvas from 'html2canvas'
 
+export interface Props {
+  showcode: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  showcode: false
+})
+const hasQRCode = ref(false)
+// const props = defineProps({
+//   showcode: Object
+// })
+
+const emit = defineEmits(['changeVi'])
+
 // const qrcodeUrl = ref('') // 邀请链接转成的二维码
 const posterUrl = ref('') // 最终生成的海报图
-const showQRCode = ref(true)
 const bgUrl = '/images/invite_bg.png' // 背景图
+let count = 0
 
+// @ts-ignore
+watch(() => props.showcode, (val) => {
+  console.log(val)
+  if(val) {
+    count++
+    if(count > 1) {
+      return
+    }
+    nextTick(() => {
+      makeQrcode()
+      drawImage()
+    })
+
+  }
+})
+
+
+const closePopup = () => {
+  emit("changeVi", false)
+}
+ 
 const makeQrcode = () => {
   let inviteLink = 'https://mall.qdovo.com/mine?t=eyJpZCI6ODQ3MzUwOH0='
   var imageWrapper = document.getElementById("imageWrapper") as HTMLElement
@@ -21,7 +56,7 @@ const makeQrcode = () => {
     colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.H
   })
-  console.log(qrcode)
+  hasQRCode.value = true
 }
 
 const drawImage = () => {
@@ -43,19 +78,15 @@ const drawImage = () => {
   });
 }
 
-onMounted(() => {
-  makeQrcode()
-  drawImage()
-})
 </script>
 
 <template>
   <!--子组件-->
   <div class="posterpopup">
-    <van-popup v-model:show="showQRCode">
+    <van-popup v-model:show="props.showcode" @close="closePopup" close-on-click-overlay closeable>
       <div id="imageWrapper1">
         <!-- 背景图 -->
-        <img width="300" height="500" class="posterpopup-img" :src="bgUrl" />
+        <img class="posterpopup-img" :src="bgUrl" />
         <!-- 二维码 -->
         <div class="qrcode1" ref="qrcode" id="imageWrapper">
           <!-- <qrcode :url="qrUrl" colorDark="#000" colorLight="#fff" :wid="wid" :hei="wid" :imgwid="imgwid" :imghei="imgwid">
@@ -66,9 +97,9 @@ onMounted(() => {
       <div class="posterpopup-img1" v-if="posterUrl">
         <img :src="posterUrl" id="posterUrl" />
       </div>
-      <div class="posterpopup-wrap">
+      <!-- <div class="posterpopup-wrap">
         <div class="wrap-text">长按保存图片</div>
-      </div>
+      </div> -->
     </van-popup>
   </div>
 </template>
@@ -84,32 +115,34 @@ onMounted(() => {
   left: $poster-margin;
   right: $poster-margin;
   margin: auto;
-  ::v-deep .van-popup--center {
+  ::v-deep .van-popup {
     width: calc(100% - $poster-margin * 2);
     height: calc(100% - $poster-margin-top - $poster-margin-bottom);
-  }
-  .van-popup {
+    top: 20px;
+    transform: translateY(0);
     background-color: transparent;
     overflow-y: hidden;
-    width: 100%;
-    height: 100%;
   }
   // 背景图
   #imageWrapper1 {
+    position: relative;
     width: 100%;
     height: 100%;
+    overflow: hidden;
+    // 背景图
     .posterpopup-img {
       width: 100%;
-      height: 100%;
+      // height: 100%;
     }
-  }
-  // 二维码
-  #imageWrapper {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    right: 30px;
-    bottom: 35px;
+    // 二维码
+    #imageWrapper {
+      position: absolute;
+      width: convertRpxToVw(380);
+      height: convertRpxToVw(380);
+      top: calc(42vh );
+      right: 50%;
+      transform: translate(50%, calc(-50%));
+    }
   }
   // 海报图元素
   .posterpopup-img1 {
@@ -120,7 +153,7 @@ onMounted(() => {
     height: 100%;
 
     & img {
-      width: 100%;
+      // width: 100%;
       height: 100%;
     }
   }

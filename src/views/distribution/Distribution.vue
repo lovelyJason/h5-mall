@@ -5,7 +5,8 @@ import { useUserStore } from '@/stores/user'
 import { showLoadingToast, showToast, showFailToast, showConfirmDialog } from 'vant'
 import Clipboard from 'clipboard'
 import { generateInvitationLink } from '@/utils'
-import Poster from './Poster.vue'
+import Poster from '@/components/Poster/index.vue'
+
 
 const btnCopy = new Clipboard('#copyUid')
 const router = useRouter()
@@ -15,7 +16,7 @@ const $WEBAPI: any = inject('$WEBAPI')
 const WEBAPI = $WEBAPI
 const wx: any = inject('wx')
 
-const showQRCode = ref(true)
+const showQRCode = ref(false)
 const data = reactive<any>({
   fxCommisionPaying: '',
   freeze: null,
@@ -264,7 +265,9 @@ const copyContent = (e: any) => {
   })
 }
 
-const saveToMobile = () => {}
+const saveToMobile = () => {
+  showQRCode.value = true
+}
 
 onMounted(() => {
   adPosition()
@@ -284,6 +287,10 @@ onMounted(() => {
 
 const gotoAssets = () => {
   router.push('/asset')
+}
+
+const changeVi = () => {
+  showQRCode.value = false
 }
 
 onBeforeUnmount(() => {
@@ -467,9 +474,9 @@ onBeforeUnmount(() => {
               canvas-id="firstCanvas"
             ></canvas>
           </div>
-          <!-- <div class="tzBtn" @click="saveToMobile" :style="{ 'margin-top': convertRpxToVw(10), background: '#F5D795', padding: `0 ${convertRpxToVw(16)}` }">
+          <div class="tzBtn" @click="saveToMobile" :style="{ 'margin-top': convertRpxToVw(10), background: '#F5D795', padding: `0 ${convertRpxToVw(16)}` }">
             保存到相册
-          </div> -->
+          </div>
         </div>
       </div>
     </div>
@@ -491,7 +498,7 @@ onBeforeUnmount(() => {
       <div class="line"></div>
       <div class="header-box2" bindtap="goApply">立即前往申请成为分销商 ></div>
     </div>
-    <Poster />
+    <Poster :showcode="showQRCode" @changeVi="changeVi" />
   </div>
 </template>
 <style scoped lang="scss">
