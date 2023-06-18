@@ -2,6 +2,7 @@
 import { ref, reactive, onMounted, inject, toRefs } from 'vue'
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
+import { showToast } from 'vant';
 
 const $WEBAPI: any = inject('$WEBAPI')
 const WEBAPI = $WEBAPI
@@ -14,6 +15,10 @@ const adPosition = async () => {
   if (res.code == 0) {
     Object.assign(adPositionFxTopPic, res.data)
   }
+}
+
+const onApplyClick = () => {
+  showToast('当前功能未开放，请联系管理员申请')
 }
 
 
@@ -52,7 +57,7 @@ onMounted(() => {
     </van-cell-group>
     <div class="tips">成为分销商后卖出商品，您可以获得佣金</div>
     <div class="btns">
-      <van-button type="primary" size="large">申请成为分销商</van-button>
+      <van-button @click="onApplyClick" type="primary" size="large">申请成为分销商</van-button>
     </div>
 
   </div>

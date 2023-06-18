@@ -6,7 +6,7 @@ import { showLoadingToast, showToast, showFailToast, showConfirmDialog } from 'v
 import Clipboard from 'clipboard'
 import { generateInvitationLink } from '@/utils'
 import Poster from '@/components/Poster/index.vue'
-
+import axios from 'axios'
 
 const btnCopy = new Clipboard('#copyUid')
 const router = useRouter()
@@ -35,7 +35,8 @@ const data = reactive<any>({
   fxCities: [],
   canvasHeight: 0,
   applyStatus: null,
-  applyInfo: {}
+  applyInfo: {},
+  inviteLink: ''
 })
 
 Date.prototype.format = function (content: any) {
@@ -247,15 +248,9 @@ const commision = async () => {
   data.commisionData = commisionData
 }
 
-const fxCities = () => {}
-
 const handleUserInfo = async () => {
   const userData = user.userData
   commision()
-  if (userData.base.isSeller) {
-    // 判断是否是市区合伙人
-    fxCities()
-  }
 }
 
 const copyContent = (e: any) => {
@@ -269,6 +264,12 @@ const saveToMobile = () => {
   showQRCode.value = true
 }
 
+const getInviteQrcode = async () => {
+  const id = user.userData.base.id
+  const res = await axios.get(`https://mall.qdovo.com/api/v1/receive/qrcode/${id}`)
+  data.inviteLink = res.data.data
+}
+
 onMounted(() => {
   adPosition()
   user.checkHasLogined().then(async (isLogined: boolean) => {
@@ -277,6 +278,7 @@ onMounted(() => {
       handleUserInfo()
       getAmount()
       getApplyProcess()
+      getInviteQrcode()
     } else {
       showFailToast({
         message: '登录失效，需要重新获取授权信息'
@@ -475,7 +477,7 @@ onBeforeUnmount(() => {
             ></canvas>
           </div>
           <div class="tzBtn" @click="saveToMobile" :style="{ 'margin-top': convertRpxToVw(10), background: '#F5D795', padding: `0 ${convertRpxToVw(16)}` }">
-            保存到相册
+            生成推广二维码
           </div>
         </div>
       </div>
@@ -498,7 +500,7 @@ onBeforeUnmount(() => {
       <div class="line"></div>
       <div class="header-box2" bindtap="goApply">立即前往申请成为分销商 ></div>
     </div>
-    <Poster :showcode="showQRCode" @changeVi="changeVi" />
+    <Poster :inviteLink="data.inviteLink" :showcode="showQRCode" @changeVi="changeVi" />
   </div>
 </template>
 <style scoped lang="scss">
@@ -659,7 +661,10 @@ onBeforeUnmount(() => {
   padding-top: 2px;
 }
 .tzBtn {
-  width: convertRpxToVw(230);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: convertRpxToVw(280);
   height: convertRpxToVw(70);
   line-height: convertRpxToVw(70);
   margin: auto;

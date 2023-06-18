@@ -5,6 +5,10 @@ import { showSuccessToast, showFailToast, showToast } from 'vant';
 
 import type { Router } from 'vue-router';
 
+// jsapi支付apiv3文档
+// https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_4
+// https://pay.weixin.qq.com/wiki/doc/apiv3/open/pay/chapter2_4.shtml
+
 // https://www.yuque.com/apifm/nu0f75/mghxuo
 
 /**

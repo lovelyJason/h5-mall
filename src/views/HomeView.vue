@@ -233,7 +233,7 @@ main {
       img {
         width: 100%;
         height: convertRpxToVw(220);
-        object-fit: scale-down;
+        object-fit: cover;
       }
     }
   }

@@ -203,7 +203,7 @@ router.beforeEach(async (to, from) => {
     }
     console.log('wxmpAuth req', req)
     // 至此任意path携带t参数就可以完成邀请，但是只有auth: true的路由页才会wxmpAuth
-    // 如http://127.0.0.1:5173/mine?t=eyJpZCI6ODQ3MzUwOH0=
+    // 如http://127.0.0.1:5173/mine?t=eyJpZCI6ODQ3MzUwOH0=     ===> '{"id":8473508}'
     let res = await getNewToken(req) // 这个code只能用一次，下一次就是500
     if(res.code !== 0) {
       // alert(res.msg)
