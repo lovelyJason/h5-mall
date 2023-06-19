@@ -267,7 +267,7 @@ const saveToMobile = () => {
 const getInviteQrcode = async () => {
   const id = user.userData.base.id
   const res = await axios.get(`https://mall.qdovo.com/api/v1/receive/qrcode/${id}`)
-  data.inviteLink = res.data.data
+  data.inviteLink = res.data.data.replace('https://mp.weixin.qq.com', 'https://mall.qdovo.com/wechat_image')
 }
 
 onMounted(() => {

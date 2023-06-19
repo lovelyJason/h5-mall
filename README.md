@@ -193,3 +193,20 @@ WEBAPI.goodsDetail，即shop/goods/detail接口入参少了token参数
 node版本：目前18.12.0可以运行
 
 新建.env.local，配置VITE_APP_ID
+
+## 使用中出现的问题
+
+- 解决微信开放平台二维码、头像canvas绘制跨域问题。html2canvas获取图片跨域
+  通过nginx反代
+
+```config
+location ^~ /wechat_image/ {
+  add_header 'Access-Control-Allow-Origin' "$http_origin" always;
+  add_header 'Access-Control-Allow-Credentials' 'true' always; 
+  add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS' always; 
+  add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-  Since,Keep-Alive,Origin,User-Agent,X-Requested-With' always; 
+  proxy_pass https://mp.weixin.qq.com/; 
+}
+```
+然后将获取微信二维码的地址由 [https://mp.weixin.qq.com/xxx] 改成[https://${域名}/wechat_image/xxx]
+
