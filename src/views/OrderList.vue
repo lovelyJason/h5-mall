@@ -59,7 +59,7 @@ const getOrderList = async (loadmore: boolean, req?: Record<string ,any>) => {
 
 const loadList = async () => {
   page.value++
-  await getOrderList(false, {page: page.value})
+  await getOrderList(true, {page: page.value})
   data.listLoading = false
   data.finished = true
 }
@@ -84,11 +84,14 @@ const payHelper = (orderId: number, money: number) => {
     // 直接使用余额支付
     WEBAPI.orderPay(wx.getStorage('token'), orderId).then(function (res: any) {
       page.value = 1
-      getOrderList(true)
+      getOrderList(false)
       getOrderStatistics()
     })
   } else {
-    wxpay('order', money, orderId, router, "/order");
+    wxpay('order', money, orderId, router, () => {
+      getOrderList(false)
+      getOrderStatistics()
+    });
   }
 }
 

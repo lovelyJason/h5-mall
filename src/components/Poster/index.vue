@@ -81,7 +81,7 @@ const drawImage = () => {
     logging: true,
     // taintTest: false,
     scale: 6,
-    backgroundColor: 'transparent'
+    backgroundColor: null
   }).then(function (canvas) {
     posterUrl.value = canvas.toDataURL("image/png")
   }).catch(function (error) {

@@ -62,7 +62,13 @@ export interface WxPayJsApiConfig {
   shopId?: number
 }
 
-export function wxpay(type: string, money: number, orderId: number, router: Router, redirectUrl: string, data?: any, content?: any) {
+export function wxpay(type: string, money: number, orderId: number, router: Router, cb: string | Function, data?: any, content?: any) {
+  let callback: Function
+  if ( typeof cb === 'string') {
+    callback = () => router.push(cb)
+  } else {
+    callback = () => cb()
+  }
   const postData: WxPayJsApiConfig = {
     token: wx.getStorage('token') as string,
     money: money,
@@ -123,7 +129,7 @@ export function wxpay(type: string, money: number, orderId: number, router: Rout
         if (res.err_msg === 'get_brand_wcpay_request:ok') {
           // this.$router.replace({ path: '/order-detail', query: { id: orderId }})
         }
-        router.push(redirectUrl)
+        callback()
       })
 
       // let wxpayConfig = {
@@ -138,12 +144,12 @@ export function wxpay(type: string, money: number, orderId: number, router: Rout
       //   ...wxpayConfig,
       //   success: function() {
       //     showSuccessToast('支付成功')
-      //     router.push(redirectUrl)
+      //     callback()
       //   },
       //   fail: function(error: any) {
       //     console.log(error)
       //     showFailToast('支付失败' + error.msg || error.message)
-      //     router.push(redirectUrl)
+      //     callback()
 
       //   }
       // })
@@ -154,7 +160,7 @@ export function wxpay(type: string, money: number, orderId: number, router: Rout
         message: JSON.stringify(res),
         showCancelButton: false
       }).then(() => {
-        router.push(redirectUrl)
+        callback()
       })
     }
   })
