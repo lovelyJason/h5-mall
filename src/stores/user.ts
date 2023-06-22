@@ -1,12 +1,22 @@
 import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
 import WEBAPI from 'apifm-webapi'
+import _ from 'lodash'
 // import AUTH from '@/utils/auth.js'
 
 // 设置store的值可以通过$patch或者调用这里的函数
 
 export const useUserStore = defineStore('user', () => {
-  const userData = reactive({
+  let localUserData: Record<string, any> = {}
+  try {
+    const localUserDataStr = localStorage.getItem('userData')
+    if (localUserDataStr) {
+      localUserData = JSON.parse(localUserDataStr)
+    }
+  } catch (error) {
+    
+  }
+  let data = !_.isEmpty(localUserData) ? localUserData : {
     base: {
       id: 0,
       nick: '',
@@ -29,7 +39,8 @@ export const useUserStore = defineStore('user', () => {
       nick: '',
       uid: 0  // 用户uid就是编号
     }  
-  })
+  }
+  const userData = reactive(data)
 
   async function checkHasLogined() {
     const token = localStorage.getItem('token')
@@ -71,6 +82,7 @@ export const useUserStore = defineStore('user', () => {
       userData.userLevel = res.data.userLevel
       userData.saleDistributionTeam = res.data.saleDistributionTeam
       userData.referrer = res.data.referrer
+      localStorage.setItem('userData', JSON.stringify(res.data))
       return userData
     } else {
       return null

@@ -48,7 +48,6 @@ import WEBAPI from 'apifm-webapi'
 import wx from '@/lib/wx'
 import wxShare from '@/utils/wxShare'
 import store from '@/stores/index'
-import { useUserStore } from '@/stores/user'
 // @ts-ignore
 import VueWechatTitle from 'vue-wechat-title'; //引入VueWechatTitle
 // import eruda from 'eruda'
@@ -109,11 +108,9 @@ app.use(Radio)
 app.use(Popup)
 app.use(List)
 
+app.use(router)
 app.use(store)
 app.use(VueWechatTitle);
-app.use(router)
-
-const user = useUserStore()
 
 app.config.globalProperties.$filters = {
   numFormat(value: number) {

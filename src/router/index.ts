@@ -1,10 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-// import { useUserStore } from '@/stores/user'; // store在router之前注册的，不能这么用
+import pinia from '../stores/index' 
+import { useUserStore } from '@/stores/user'; // store在router之前注册的，不能这么用
 import { checkHasLogined, redirectToWechatAuth, getNewToken } from '@/utils/auth'
 import { showFailToast, showToast } from 'vant';
 import wx from '@/lib/wx';
-// const user = useUserStore()
+import { getWxUserInfo } from '@/services/wx';
+
+const userStore = useUserStore(pinia)
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,7 +65,7 @@ const router = createRouter({
       name: 'mine',
       meta: {
         title: '会员中心',
-        auth: false
+        auth: true
       },
       component: () => import('../views/Mine.vue')
     },
@@ -179,6 +182,7 @@ router.beforeEach(async (to, from) => {
   n = n + 1
   let code = to.query.code
   let t = to.query.t
+  let state = to.query.state
   let path = to.path
   if(code) {
     let req: any = { 
@@ -201,15 +205,27 @@ router.beforeEach(async (to, from) => {
         req.referrer = referrer
       }
     }
-    console.log('wxmpAuth req', req)
     // 至此任意path携带t参数就可以完成邀请，但是只有auth: true的路由页才会wxmpAuth
     // 如http://127.0.0.1:5173/mine?t=eyJpZCI6ODQ3MzUwOH0=     ===> '{"id":8473508}'
-    let res = await getNewToken(req) // 这个code只能用一次，下一次就是500
-    if(res.code !== 0) {
-      // alert(res.msg)
-      showFailToast(res.msg)
+
+    // 如果是非静默授权，需要调用我的接口设置微信头像昵称先
+    try {
+      if(state === '1') {
+        const id = userStore.userData.base.id
+        await getWxUserInfo(code as string, id) // 设置成功以后，会员页会主动调getUserInfo拉到最新用户信息
+      } else {
+        let res = await getNewToken(req) // 这个code只能用一次，下一次就是500
+        if(res.code !== 0) {
+          // alert(res.msg) // {code: -1, message: "invalid code, rid: 6493df98-2e5f6eb1-15d35046", msg: "系统异常", status: -1}
+          showFailToast(res.msg)
+        }
+      }
+    } catch (error: any) {
+      console.log(error)
+      showFailToast(error.message || error.msg)
     }
     delete newQuery.code  // 否则会死循环
+    delete newQuery.state //可能会冗余多个参数在url
     // delete newQuery.t
     // replace了也会触发一次导航守卫
     return {
@@ -224,7 +240,7 @@ router.beforeEach(async (to, from) => {
         showToast('检测到您未登录，正在为您登录中...')
         setTimeout(() => {
           let redirect_url = location.href  // 等于from的地址
-          redirectToWechatAuth(false, redirect_url) // ③
+          redirectToWechatAuth(true, redirect_url) // ③
         }, 800)
       } else {
         return true
