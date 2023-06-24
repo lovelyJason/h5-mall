@@ -132,9 +132,9 @@ const onCategoryClick = async (e: number) => {
   getGoodsList({ k: searchValue.value });
 }
 
-const gotoOrderPage = (e: any, id: number | string) => {
+const gotoOrderPage = (e: any, id: number | string, logisticsId: number) => {
   e.stopPropagation();
-  router.push('/to-pay-order?id=' + id)
+  router.push(`/to-pay-order?id=${id}&mod=${logisticsId > 0 ? '1' : '0'}`)
   // TODO:给入口关注公众号
 
 }
@@ -181,7 +181,7 @@ onMounted(() => {
     </div>
     <van-search @clear="onSearchClear" clearable @search="searchGoodes" v-model="searchValue" placeholder="请输入搜索关键词" />
     <van-row  justify="space-between">
-      <van-col class="category-col left" span="6">
+      <van-col class="category-col left" style="box-shadow: 3px 3px 2px rgba(0, 0, 0, 0.02), 6px 6px 5px rgba(0, 0, 0, 0.028), 12px 12px 10px rgba(0, 0, 0, 0.035), 22px 22px 18px rgba(0, 0, 0, 0.042), 41px 41px 33px rgba(0, 0, 0, 0.05), 100px 100px 80px rgba(0, 0, 0, 0.07);">
         <van-sidebar v-model="activeCategory">
           <!-- 这里$event就是index，好像传递不了事件对象 -->
           <van-sidebar-item @click="onCategoryClick" :data-idx="index"  v-for="(category, index) in firstCategories" :key="category.id"  :title="category.name" />
@@ -202,7 +202,7 @@ onMounted(() => {
         >
           <template #footer>
             <van-divider style="margin: 8px 0;" />
-            <div @click="gotoOrderPage($event, item.id)" class="prod-card-footer-order">
+            <div @click="gotoOrderPage($event, item.id, item.logisticsId)" class="prod-card-footer-order">
               <span>立即下单</span>
               <!-- <van-button plain hairline type="primary" size="large" @click="gotoOrderPage(item.id)">下单</van-button> -->
             </div>
@@ -238,8 +238,9 @@ main {
     }
   }
 }
-.category-col, .product-col {
-  /* background-color: #fff; */
+.product-col {
+  padding-top: 12px;
+  padding-bottom: 50px;
 }
 .category-col {
   box-shadow:
@@ -252,7 +253,7 @@ main {
 ;
 }
 .left, .right {
-  height: calc(100vh - 120px - 29vw); // 上面增加了内容这里要缩短否则滚动条出现
+  height: calc(100vh - 50px - 29.3vw - 1rem - 54px); // 上面增加了内容这里要缩短否则滚动条出现
   overflow: auto;
 }
 .prod-card-footer-order {

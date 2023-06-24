@@ -324,15 +324,15 @@ onBeforeUnmount(() => {
         <div class="header-box2"></div>
         <div class="line"></div>
         <div class="asset">
-          <div class="item" @click="gotoAssets" :style="{ width: '72px' }">
+          <div class="item" @click="gotoAssets" :style="{ width: '82px' }">
             <div class="Count">{{ data.fxCommisionPaying }}</div>
             <div>未结算金额</div>
           </div>
-          <div class="item" @click="gotoAssets" :style="{ width: '72px' }">
+          <div class="item" @click="gotoAssets" :style="{ width: '82px' }">
             <div class="Count">{{ data.freeze }}</div>
             <div>冻结金额</div>
           </div>
-          <div class="item right" @click="gotoAssets" :style="{ width: '72px' }">
+          <div class="item right" @click="gotoAssets" :style="{ width: '82px' }">
             <div class="Count" style="color: #ff444a">{{ data.balance }}</div>
             <div>可用金额</div>
           </div>
@@ -395,12 +395,11 @@ onBeforeUnmount(() => {
         </div>
       </div>
       <img
-        v-if="data.fxIndexAdPos"
+        v-if="data.fxIndexAdPos.val"
         :src="data.fxIndexAdPos.val"
         mode="widthFix"
         class="adpos"
         :data-url="data.fxIndexAdPos.url"
-        bindtap="goUrl"
       />
       <van-cell-group title="分销信息" custom-class="cell-class">
         <van-field v-model="user.userData.base.id" readonly center clearable label="我的邀请码">

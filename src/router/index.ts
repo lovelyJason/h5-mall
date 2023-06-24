@@ -2,12 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import pinia from '../stores/index' 
 import { useUserStore } from '@/stores/user'; // store在router之前注册的，不能这么用
-import { checkHasLogined, redirectToWechatAuth, getNewToken } from '@/utils/auth'
+import { checkHasLogined, redirectToWechatAuth, getNewToken, getMyNewToken } from '@/utils/auth'
 import { showFailToast, showToast } from 'vant';
 import wx from '@/lib/wx';
-import { getWxUserInfo } from '@/services/wx';
 
 const userStore = useUserStore(pinia)
+const isDev = process.env.NODE_ENV === 'development'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -65,7 +65,7 @@ const router = createRouter({
       name: 'mine',
       meta: {
         title: '会员中心',
-        auth: true
+        auth: false
       },
       component: () => import('../views/Mine.vue')
     },
@@ -98,6 +98,15 @@ const router = createRouter({
         title: '个人设置'
       },
       component: () => import('../views/Settings.vue')
+    },
+    {
+      path: '/info',
+      name: 'info',
+      meta: {
+        title: '个人信息',
+        auth: false
+      },
+      component: () => import('../views/Info.vue')
     },
     {
       path: '/settings/aboutus',
@@ -210,15 +219,25 @@ router.beforeEach(async (to, from) => {
 
     // 如果是非静默授权，需要调用我的接口设置微信头像昵称先
     try {
-      if(state === '1') {
-        const id = userStore.userData.base.id
-        await getWxUserInfo(code as string, id) // 设置成功以后，会员页会主动调getUserInfo拉到最新用户信息
+      // if(state === '1') { // state为1表示调我自己的登录接口，为的是设置上用户头像和昵称
+      //   const id = userStore.userData.base.id
+      //   await getMyNewToken(code as string) // 设置成功以后，会员页会主动调getUserInfo拉到最新用户信息
+      // } else {
+      //   let res = await getNewToken(req) // 这个code只能用一次，下一次就是500
+      //   if(res.code !== 0) {
+      //     // alert(res.msg) // {code: -1, message: "invalid code, rid: 6493df98-2e5f6eb1-15d35046", msg: "系统异常", status: -1}
+      //     showFailToast(res.msg)
+      //   }
+      // }
+      let res: any
+      if(isDev) {
+        res = await getNewToken(req) // 这个code只能用一次，下一次就是500
       } else {
-        let res = await getNewToken(req) // 这个code只能用一次，下一次就是500
-        if(res.code !== 0) {
-          // alert(res.msg) // {code: -1, message: "invalid code, rid: 6493df98-2e5f6eb1-15d35046", msg: "系统异常", status: -1}
-          showFailToast(res.msg)
-        }
+        res = await getMyNewToken(code as string) // 这个code只能用一次，下一次就是500
+      }
+      if(res.code !== 0) {
+        // alert(res.msg) // {code: -1, message: "invalid code, rid: 6493df98-2e5f6eb1-15d35046", msg: "系统异常", status: -1}
+        showFailToast(res.msg)
       }
     } catch (error: any) {
       console.log(error)
@@ -240,7 +259,7 @@ router.beforeEach(async (to, from) => {
         showToast('检测到您未登录，正在为您登录中...')
         setTimeout(() => {
           let redirect_url = location.href  // 等于from的地址
-          redirectToWechatAuth(true, redirect_url) // ③
+          redirectToWechatAuth(false, redirect_url, '1') // ③ 还是要非静默授权设置上头像，昵称
         }, 800)
       } else {
         return true

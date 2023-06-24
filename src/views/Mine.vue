@@ -133,7 +133,8 @@ onBeforeUnmount(() => {
         <div class="avatar" v-else @click="getWxUserInfo" :style="{backgroundImage: `url(${initialAvatar})`}"></div>
         <div class="r">
           <div class="uid">用户ID: {{ user.userData.base.id }}</div>
-          <div class="nick" @click="nickShow = true">{{ user.userData.base.nick ? user.userData.base.nick : '点击设置昵称' }}</div>
+          <!-- <div class="nick" @click="nickShow = true">{{ user.userData.base.nick ? user.userData.base.nick : '点击设置昵称' }}</div> -->
+          <div class="nick">{{ user.userData.base.nick ? user.userData.base.nick : '点击设置昵称' }}</div>
         </div>
       </div>
       <div v-else class="header-box-left">
@@ -184,7 +185,7 @@ onBeforeUnmount(() => {
       <van-cell v-if="user.userData.base.isSeller" title="推广订单" is-link @click="router.push('/commision-orderlist')" />
     </van-cell-group>
     <van-cell-group title="其他功能">
-      <van-cell title="个人信息" />
+      <van-cell title="设备信息" is-link @click="router.push('/info')" />
       <van-cell title="系统设置" is-link @click="router.push('/settings')" />
     </van-cell-group>
     <div id="mineDebug" style="height: 100px;"></div>

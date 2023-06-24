@@ -1,5 +1,6 @@
 import WEBAPI from 'apifm-webapi'
 import { showFailToast } from 'vant';
+import api from '../lib/request'
 
 // user store本来能处理的，但是路由文件中使用store好像会报错，调用这里先
 // 检测登录状态，返回 true / false
@@ -27,8 +28,8 @@ export const redirectToWechatAuth = (silent, redirect_uri, state) => {
   let appid = import.meta.env.VITE_APP_ID
   let scope = silent ? 'snsapi_base' : 'snsapi_userinfo'
   // redirect_uri需要urlEncode处理
-  if(redirect_uri) {
-    redirect_uri = encodeURI(redirect_uri) 
+  if (redirect_uri) {
+    redirect_uri = encodeURI(redirect_uri)
   } else {
     // '{"id":8473508}'
     redirect_uri = 'http%3A%2F%2F127.0.0.1:5173/mine?t=eyJpZCI6ODQ3MzUwOH0='
@@ -40,33 +41,23 @@ export const redirectToWechatAuth = (silent, redirect_uri, state) => {
 
 export async function getNewToken(data) {
   // const wxcode = route.query.code
+  // {"code":0,"data":{"openid":"o4oq46Kg2P5W9DBiDsifTVwuuv_M","token":"f213ef77-bfd2-4f6d-844a-d151a20aef62","uid":8473508},"msg":"success"}
   const authInfo = await WEBAPI.wxmpAuth(data)
-  if(authInfo.code != 0) {
-
+  if (authInfo.code != 0) {
   } else {
     const token = authInfo.data.token
     localStorage.setItem('token', token)
   }
-  return authInfo 
+  return authInfo
 }
-
-export const wxWebpageLogin = async (router) => {
-  // 1.重定向到微信授权页，静默或非静默
-  const route = router.currentRoute.value
-  try {
-    // '{"id":8473508}'
-    // ?t=eyJpZCI6ODQ3MzUwOH0= 一串base64编码，含有邀请人的用户编号
-    const params = JSON.parse(window.atob(route.query.t))
-    let data  = {
-      code: route.query.code,
-      referrer: params.id
-    }
-    await user.getNewToken(data)
-    router.push('/mine')
-  } catch (error) {
-    // 邀请参数非法
-    showFailToast('参数非法')
+export async function getMyNewToken(code) {
+  const authInfo = await api.get(`https://mall.qdovo.com/api/v1/wx/user?code=${code}`)
+  if (authInfo.code != 0) {
+  } else {
+    const token = authInfo.data.token
+    localStorage.setItem('token', token)
   }
+  return authInfo
 }
 
 export async function authorize() {

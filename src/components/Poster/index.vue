@@ -26,7 +26,7 @@ const emit = defineEmits(['changeVi'])
 
 // const qrcodeUrl = ref('') // 邀请链接转成的二维码
 const posterUrl = ref('') // 最终生成的海报图
-const bgUrl = '/images/invite_bg2.jpg' // 背景图
+const bgUrl = '/images/invite_bg3.png' // 背景图
 let count = 0
 
 // @ts-ignore
@@ -71,17 +71,19 @@ const makeQrcode = () => {
 
 const drawImage = () => {
   var imageWrapper1 = document.getElementById("imageWrapper1") as HTMLElement
+  var bg = document.getElementById("posterpopupImg") as HTMLElement
   html2canvas(imageWrapper1, {
-    width: imageWrapper1.offsetWidth,
-    height: imageWrapper1.offsetHeight,
+    width: imageWrapper1.offsetWidth - 2,
+    height: imageWrapper1.offsetHeight - 2,
     allowTaint: true,
     useCORS: true,
     scrollX: 0,
     scrollY: 0,
+    y: 0,
     logging: true,
     // taintTest: false,
     scale: 6,
-    backgroundColor: null
+    // backgroundColor: null
   }).then(function (canvas) {
     posterUrl.value = canvas.toDataURL("image/png")
   }).catch(function (error) {
@@ -94,10 +96,10 @@ const drawImage = () => {
 <template>
   <!--子组件-->
   <div v-if="props.showcode" class="posterpopup">
-    <van-popup v-model:show="props.showcode" @close="closePopup" close-on-click-overlay closeable>
+    <van-popup v-model:show="props.showcode" @close="closePopup" close-on-click-overlay closeable close-icon-position="top-right">
       <div id="imageWrapper1">
         <!-- 背景图 -->
-        <img class="posterpopup-img" :src="bgUrl" />
+        <img id="posterpopupImg" class="posterpopup-img" :src="bgUrl" />
         <!-- 二维码 -->
         <!-- error loading backgroundImage -->
         <!-- <div ref="qrcode" :style="{backgroundImage: `url(${props.inviteLink})`}" id="imageWrapper"></div> -->
@@ -140,7 +142,9 @@ const drawImage = () => {
     position: relative;
     width: 100%;
     height: 100%;
+    // height: 70vh;
     overflow: hidden;
+    background-color: transparent;
     // 背景图
     .posterpopup-img {
       width: 100%;
@@ -150,6 +154,7 @@ const drawImage = () => {
     // 二维码
     #imageWrapper {
       position: absolute;
+      z-index: 100;
       width: convertRpxToVw(200);
       height: convertRpxToVw(200);
       // top: calc(106vw + 12px);
@@ -157,7 +162,7 @@ const drawImage = () => {
       // top: 70vh;
       top: 53%;
       transform: translateY(88%);
-      right: 3vw;
+      right: 2vw;
       border-radius: 6px;
       @media (max-height: 700px){
         top: 61%;

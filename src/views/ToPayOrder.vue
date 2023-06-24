@@ -97,7 +97,8 @@ const onAreaConfirm = (selectedValues: any) => {
 }
 
 const isNeedLogistics = computed(() => {
-  return goodsDetail.logistics && Object.keys(goodsDetail.logistics).length > 0
+  const mod = route.query.mod
+  return goodsDetail.logistics && Object.keys(goodsDetail.logistics).length > 0 || mod === '1'
 })
 
 const userAmount = async () => {

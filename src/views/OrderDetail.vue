@@ -6,6 +6,7 @@ import { showSuccessToast, showLoadingToast, showToast, showFailToast, showConfi
 import { useUserStore } from '@/stores/user';
 // @ts-ignore
 import { redirectToWechatAuth } from '@/utils/index'
+import { convertGantanhaoOrderStatus } from '@/utils/convert'
 
 const $WEBAPI: any = inject('$WEBAPI')
 const WEBAPI = $WEBAPI
@@ -21,7 +22,8 @@ const data = reactive<Record<string, any>>({
     orderInfo: {},
     goodsCoupons: [],
     logistics: {},
-    logisticsTraces: []
+    logisticsTraces: [],
+    extJson: {}
   }
 })
 
@@ -127,8 +129,12 @@ onMounted(() => {
         </template>
       </div>
       <div class="goods-list">
-        <div class="list-title">商品信息</div>
-        <form bindsubmit="submitReputation">
+        <div class="list-title section-title">
+          <div class="title-inner">
+            商品信息
+          </div>
+        </div>
+        <form>
           <van-card 
             v-for="item in data.orderDetail.goods" :key="item.id"
             :num="item.number" 
@@ -154,16 +160,47 @@ onMounted(() => {
           <div class="right-text">¥ {{ data.orderDetail.orderInfo.amountReal }}</div>
         </div>
       </div>
+      <van-cell-group style="margin-top: 8px;margin-bottom: 20px;">
+        <van-cell>
+          <template #title>
+            <div class="title-inner">
+              入网进度
+            </div>
+          </template>
+        </van-cell>
+        <van-cell v-if="data.orderDetail.extJson.status" title="订单状态" :value="convertGantanhaoOrderStatus(data.orderDetail.extJson.status)" />
+        <van-cell v-if="data.orderDetail.extJson.plan_mobile_produced" title="生产号码" :value="data.orderDetail.extJson.plan_mobile_produced" />
+        <van-cell v-if="data.orderDetail.extJson.is_activated === '1'" title="激活时间" :value="data.orderDetail.extJson.activated_at" />
+        <van-cell v-if="data.orderDetail.extJson.is_recharged === '1'" title="首充时间" :value="data.orderDetail.extJson.recharged_at" />
+        <van-cell v-if="data.orderDetail.extJson.reason" class="fail-reason" title="失败原因" :label="data.orderDetail.extJson.reason" />
+      </van-cell-group>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
+div {
+  box-sizing: border-box;
+}
 .page {
   min-height: 100%;
   background-color: #F2f2f2;
 }
+.section-title {
+  padding: var(--van-cell-vertical-padding) var(--van-cell-horizontal-padding);
+}
+.title-inner {
+  text-indent: 10px;
+  border-left: 4px solid var(--van-blue);
+}
+.fail-reason {
+  ::v-deep {
+    .van-cell__label{
+      word-break: break-all;
+    }
 
+  }
+}
 .container {
   min-height: 100%;
   overflow: hidden;
@@ -320,9 +357,8 @@ onMounted(() => {
 .goods-list .list-title {
   font-size: convertRpxToVw(28);
   color: #000;
-  padding: convertRpxToVw(30) 0 convertRpxToVw(25) convertRpxToVw(30);
+  // padding: convertRpxToVw(30) 0 convertRpxToVw(25) convertRpxToVw(30);
 }
-
 .goods-list .a-goods {
   width: convertRpxToVw(720);
   margin-left: convertRpxToVw(30);

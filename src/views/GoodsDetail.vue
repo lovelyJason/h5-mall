@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router';
 import { showSuccessToast, showLoadingToast, showToast, showFailToast, showConfirmDialog } from 'vant';
 import { useUserStore } from '@/stores/user';
 // @ts-ignore
-import { redirectToWechatAuth } from '@/utils/index'
+import _ from 'lodash'
 
 const $WEBAPI: any = inject('$WEBAPI')
 const WEBAPI = $WEBAPI
@@ -107,10 +107,10 @@ const goodsAddition = async () => {
 
 const gotoPayOrder = (id: string | number) => {
   if(isLogined.value) {
-    router.push('/to-pay-order?id=' + id)
+    router.push(`/to-pay-order?id=${id}&mod=${_.isEmpty(data.goodsDetail.logistics) ? '0' : '1'}`)
   } else {
     showToast('您还未登录，正在为您登录...') // 路由守卫里的下单页需要权限，会处理登录的
-    router.push('/to-pay-order?id=' + id)
+    router.push(`/to-pay-order?id=${id}&mod=${_.isEmpty(data.goodsDetail.logistics) ? '0' : '1'}`)
     // router.push('/mine?id=' + id)
   }
 }

@@ -12,8 +12,16 @@ const wx: any = inject('wx')
 const page = ref(1)
 const activeIndex = ref(0)
 const data =reactive<any>({
-  members: []
+  members: [],
+  membersStatistics: {}
 })
+
+const getMembersStatistics = async () => {
+  const res = await WEBAPI.fxMembersStatistics(wx.getStorage('token'))
+  if(res.code === 0) {
+    data.membersStatistics = res.data
+  }
+}
 
 const getMembers = async () => {
   const res = await WEBAPI.fxMembers({
@@ -72,14 +80,15 @@ const gotoUserDetail = (member: any) => {
 
 onMounted(() => {
   getMembers()
+  getMembersStatistics()
 })
 </script>
 
 <template>
   <van-sticky>
     <van-tabs :active="activeIndex" @change="tabChange">
-      <van-tab title="直推" info="number1 ? number1 : ''" />
-      <van-tab title="间推" info="number2 ? number2 : ''" />
+      <van-tab :title="`直推(${data.membersStatistics.totleChildFxsLevel1 || 0})`" info="number1 ? number1 : ''" />
+      <van-tab :title="`间推(${data.membersStatistics.totleChildFxsLevel2 || 0})`" info="number2 ? number2 : ''" />
     </van-tabs>
   </van-sticky>
   <van-empty v-if="!data.members || data.members.length == 0" description="暂无团队" />
