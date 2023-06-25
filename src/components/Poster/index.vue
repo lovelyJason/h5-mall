@@ -26,7 +26,7 @@ const emit = defineEmits(['changeVi'])
 
 // const qrcodeUrl = ref('') // 邀请链接转成的二维码
 const posterUrl = ref('') // 最终生成的海报图
-const bgUrl = '/images/invite_bg3.png' // 背景图
+const bgUrl = ref('/images/invite_bg3.png') // 背景图
 let count = 0
 
 // @ts-ignore
@@ -37,11 +37,13 @@ watch(() => props.showcode, (val) => {
     if(count > 1) {
       return
     }
-    nextTick(() => {
-      // makeQrcode()   // 用关注二维码替换
+    // nextTick(() => {
+    //   // makeQrcode()   // 用关注二维码替换
+    //   drawImage()
+    // })
+    setTimeout(() => {
       drawImage()
-    })
-
+    }, 1000)
   }
 })
 
@@ -72,9 +74,11 @@ const makeQrcode = () => {
 const drawImage = () => {
   var imageWrapper1 = document.getElementById("imageWrapper1") as HTMLElement
   var bg = document.getElementById("posterpopupImg") as HTMLElement
+  console.log(imageWrapper1.offsetWidth, imageWrapper1.offsetHeight)
+  console.log(bg.offsetWidth, bg.offsetHeight)
   html2canvas(imageWrapper1, {
-    width: imageWrapper1.offsetWidth - 2,
-    height: imageWrapper1.offsetHeight - 2,
+    width: imageWrapper1.offsetWidth,
+    height: imageWrapper1.offsetHeight,
     allowTaint: true,
     useCORS: true,
     scrollX: 0,
@@ -85,7 +89,7 @@ const drawImage = () => {
     scale: 6,
     // backgroundColor: null
   }).then(function (canvas) {
-    posterUrl.value = canvas.toDataURL("image/png")
+    bgUrl.value = canvas.toDataURL("image/png")
   }).catch(function (error) {
     console.log(error)
   });
@@ -96,7 +100,7 @@ const drawImage = () => {
 <template>
   <!--子组件-->
   <div v-if="props.showcode" class="posterpopup">
-    <van-popup v-model:show="props.showcode" @close="closePopup" close-on-click-overlay closeable close-icon-position="top-right">
+    <van-popup v-model:show="props.showcode" @close="closePopup" :lazy-render="false" close-on-popstate close-on-click-overlay closeable close-icon-position="top-right">
       <div id="imageWrapper1">
         <!-- 背景图 -->
         <img id="posterpopupImg" class="posterpopup-img" :src="bgUrl" />
@@ -121,7 +125,7 @@ const drawImage = () => {
 <style lang="scss" scoped>
 .posterpopup {
   $poster-margin: 20px;
-  $poster-margin-bottom: 40px;
+  $poster-margin-bottom: 20px;
   $poster-margin-top: 20px;
   position: absolute;
   top: $poster-margin-top;
@@ -141,15 +145,15 @@ const drawImage = () => {
   #imageWrapper1 {
     position: relative;
     width: 100%;
-    height: 100%;
-    // height: 70vh;
+    margin-top: 50px;
+    // height: 100%;
     overflow: hidden;
+    // transform: translateY(10%);
     background-color: transparent;
     // 背景图
     .posterpopup-img {
       width: 100%;
-      // height: 100%;
-      transform: translateY(12%);
+      vertical-align: bottom;
     }
     // 二维码
     #imageWrapper {
@@ -161,14 +165,16 @@ const drawImage = () => {
       // top: 62.5%;
       // top: 70vh;
       top: 53%;
-      transform: translateY(88%);
+      transform: translateY(112%);
       right: 2vw;
       border-radius: 6px;
       @media (max-height: 700px){
         top: 61%;
+        transform: translateY(72%);
       }
       @media (min-height: 800px) and (max-height: 850px){
         top: 50%;
+        transform: translateY(128%);
       }
       // background-size: contain;
       object-fit: contain;
@@ -176,9 +182,9 @@ const drawImage = () => {
     .avatar {
       // border: 1px solid red;
       position: absolute;
-      top: 90vw;
+      top: 72vw;
       // top: 46vh;
-      left: 11px;
+      left: 8px;
       width: 20vw;
       border-radius: 6px;
     }
