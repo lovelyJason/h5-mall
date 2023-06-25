@@ -129,7 +129,7 @@ onBeforeUnmount(() => {
     <Topbar v-if="!isInWechat" title="会员中心" :show-back="false" />
     <div class="header-box">
       <div v-if="isLogined" class="header-box-left">
-        <div class="avatar" @click="getWxUserInfo" v-if="user.userData.base.avatarUrl" :style="{backgroundImage: `url(${user.userData.base.avatarUrl})`}"></div>
+        <div class="avatar" v-if="user.userData.base.avatarUrl" :style="{backgroundImage: `url(${user.userData.base.avatarUrl})`}"></div>
         <div class="avatar" v-else @click="getWxUserInfo" :style="{backgroundImage: `url(${initialAvatar})`}"></div>
         <div class="r">
           <div class="uid">用户ID: {{ user.userData.base.id }}</div>
