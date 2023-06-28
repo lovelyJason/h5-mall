@@ -8,6 +8,7 @@ import wx from '@/lib/wx';
 
 const userStore = useUserStore(pinia)
 const isDev = process.env.NODE_ENV === 'development'
+let userDisabled = false
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -183,11 +184,21 @@ const router = createRouter({
         auth: true
       },
       component: () => import('../views/Withdrawal.vue')
+    },
+    {
+      path: '/403',
+      name: 'forbidden',
+      meta: {
+        title: '禁止使用',
+        auth: false
+      },
+      component: () => import('../views/Forbidden.vue')
     }
   ]
 })
 let n = 0
 router.beforeEach(async (to, from) => {
+  // debugger
   n = n + 1
   let code = to.query.code
   let t = to.query.t
@@ -238,10 +249,15 @@ router.beforeEach(async (to, from) => {
       if(res.code !== 0) {
         // alert(res.msg) // {code: -1, message: "invalid code, rid: 6493df98-2e5f6eb1-15d35046", msg: "系统异常", status: -1}
         showFailToast(res.msg)
+        userDisabled = true
+        // 封禁的用户直接滚蛋
+        return '/403'
       }
     } catch (error: any) {
       console.log(error)
       showFailToast(error.message || error.msg)
+      // 注意封装过的api code不是0会到这里来
+      return '/403'
     }
     delete newQuery.code  // 否则会死循环
     delete newQuery.state //可能会冗余多个参数在url
@@ -254,6 +270,7 @@ router.beforeEach(async (to, from) => {
   } else {
     if(to.meta.auth) {
       // TODO:怎么在router中访问pinia是个问题
+      if(userDisabled) return '/403'
       let isLogined = await checkHasLogined()
       if(!isLogined) {
         showToast('检测到您未登录，正在为您登录中...')
