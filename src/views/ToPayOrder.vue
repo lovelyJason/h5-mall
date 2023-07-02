@@ -247,17 +247,10 @@ onMounted(() => {
       user.getUserApiInfo()
       await Promise.all([getGoodesDetail(), userAmount()])
       await createOrder(true)
-    } else {
-
     }
   })
 })
 
-const actions =  [
-      { text: '选项一' },
-      { text: '选项二' },
-      { text: '选项三' },
-    ]
 </script>
 
 <template>
@@ -390,6 +383,17 @@ const actions =  [
           <li>3、充值失败会退款</li>
         </ul>
       </div>
+      <div v-else class="card recharge-explain explain1">
+        <van-icon class="icon-desc" name="description"></van-icon>
+        <span class="title">购买说明</span>
+        <ul>
+          <li>1、本套餐一个证件只能办理一张，发货后请使用订购人身份证原件按照随卡寄送的单页说明进行激活，若发货后超过20天未激活，系统将回收处理。</li>
+          <li>2、根据国家相关规定，未满16周岁的用户将不能在网络渠道办理入网因年龄问题未能激活的用户，请由您的法定代理人前往营业厅代为办理。</li>
+          <li>3、本号卡仅满足用户正常使用通话和流量，对于因受业务及物流限制地区可能产生电信诈骗的归属地我们会进行鉴别并不支持发货，敬请见谅。</li>
+          <li>4、未满16周岁，一证五号已满 (含正在使用的)国政通不通过，军人保密单位等职业的身份证属于特殊证件无法网上办理通讯业务，故不发货。</li>
+        </ul>
+        <p style="color: #8c8c94;">*您的信息运营商已严格保密 请您填写后仔细核对再提交 确保审核通过</p>
+      </div>
       <!-- <div class="bottom-box"></div> -->
       <van-submit-bar 
         v-if="!isNeedLogistics"
@@ -421,6 +425,7 @@ textarea {
 
 .page {
   background-color: #f2f2f2;
+  padding-bottom: calc(50px + 12px + env(safe-area-inset-bottom));
   &.need-logistics {
     --van-submit-bar-button-width: 200px;
     --van-submit-bar-button-width: 100%;
@@ -747,6 +752,14 @@ form {
   li {
     color: #666;
     line-height: 30px;
+  }
+}
+
+.recharge-explain {
+  &.explain1 {
+    li {
+      margin-bottom: 4px;
+    }
   }
 }
 </style>

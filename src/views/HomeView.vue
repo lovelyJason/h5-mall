@@ -216,7 +216,12 @@ onMounted(() => {
 
 <style scoped lang="scss">
 main {
+  // $swiper-height: 29.3vw;
+  $swiper-height: 18vh;
+  // $swiper-height: 150px;
   /* background-color: #ccc; */
+  width: 100vw;
+  max-width: 1280px;
   padding: 1rem 0.8rem 0;
   .van-sidebar {
     width: 100%;
@@ -224,15 +229,15 @@ main {
   .swiper-container {
     width: 100%;
     // height: 375rpx;
-    height: convertRpxToVw(220);
+    height: $swiper-height;
     position: relative;
     z-index: 1;
     .swiper1 {
       width: 100%;
-      height: convertRpxToVw(220);
+      height: $swiper-height;
       img {
         width: 100%;
-        height: convertRpxToVw(220);
+        height: $swiper-height;
         object-fit: cover;
       }
     }
@@ -253,7 +258,7 @@ main {
 ;
 }
 .left, .right {
-  height: calc(100vh - 50px - 29.3vw - 1rem - 54px); // 上面增加了内容这里要缩短否则滚动条出现
+  height: calc(100vh - 50px - 18vh - 1rem - 54px); // 上面增加了内容这里要缩短否则滚动条出现
   overflow: auto;
 }
 .prod-card-footer-order {

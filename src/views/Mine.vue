@@ -112,8 +112,6 @@ onMounted(() => {
     isLogined.value = _isLogined
     if (_isLogined) {
       Promise.all([user.getUserApiInfo(), userAmount()])
-    } else {
-     
     }
   })
 })

@@ -116,7 +116,7 @@ const gotoPayOrder = (id: string | number) => {
 }
 
 const openCustomerService = () => {
-  showToast('开发中')
+  location.href = 'https://work.weixin.qq.com/kfid/kfce8b0fa15161f6048?FromMpMsg=1&MpAppId=wx5591d62831a7fba4'
 }
 
 const shareGoods = () => {
