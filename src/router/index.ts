@@ -249,15 +249,23 @@ router.beforeEach(async (to, from) => {
       if(res.code !== 0) {
         // alert(res.msg) // {code: -1, message: "invalid code, rid: 6493df98-2e5f6eb1-15d35046", msg: "系统异常", status: -1}
         showFailToast(res.msg)
-        userDisabled = true
-        // 封禁的用户直接滚蛋
-        return '/403'
+        if(res.code === 500) {
+          userDisabled = true
+          // 封禁的用户直接滚蛋
+          return '/403'
+        }
+        return '/'
       }
     } catch (error: any) {
       console.log(error)
       showFailToast(error.message || error.msg)
       // 注意封装过的api code不是0会到这里来
-      return '/403'
+      if(error.code === 500) {
+        userDisabled = true
+        // 封禁的用户直接滚蛋
+        return '/403'
+      }
+      return '/'
     }
     delete newQuery.code  // 否则会死循环
     delete newQuery.state //可能会冗余多个参数在url
