@@ -324,15 +324,15 @@ onBeforeUnmount(() => {
         <div class="header-box2"></div>
         <div class="line"></div>
         <div class="asset">
-          <div class="item" @click="gotoAssets" :style="{ width: '82px' }">
+          <div class="item" @click="gotoAssets" :style="{ width: '100px' }">
             <div class="Count">{{ data.fxCommisionPaying }}</div>
             <div>未结算金额</div>
           </div>
-          <div class="item" @click="gotoAssets" :style="{ width: '82px' }">
+          <div class="item" @click="gotoAssets" :style="{ width: '100px' }">
             <div class="Count">{{ data.freeze }}</div>
             <div>冻结金额</div>
           </div>
-          <div class="item right" @click="gotoAssets" :style="{ width: '82px' }">
+          <div class="item right" @click="gotoAssets" :style="{ width: '100px' }">
             <div class="Count" style="color: #ff444a">{{ data.balance }}</div>
             <div>可用金额</div>
           </div>

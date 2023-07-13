@@ -122,8 +122,12 @@ onMounted(() => {
   </van-tabs>
   <van-cell-group v-if="data.activeIndex == 0">
     <van-empty v-if="data.cashlogs.length <= 0" description="暂无资金明细" />
-    <van-cell v-for="(item, index) in data.cashlogs" :key="index" :title="item.typeStr" :label="item.dateAdd"
-      :value="item.amount" />
+    <van-cell v-for="(item, index) in data.cashlogs" :key="index" :title="item.typeStr" :label="item.dateAdd" :value="item.amount">
+      <template #title>
+        <span class="custom-title">{{ item.typeStr }}</span>
+        <van-tag  color="#ffe1e1" text-color="#ad0000" >{{ item.remark }}</van-tag>
+      </template>
+    </van-cell>
   </van-cell-group>
   <van-cell-group v-if="data.activeIndex == 1">
     <van-empty v-if="data.withDrawlogs.length <= 0" description="暂无提现记录" />
@@ -190,5 +194,8 @@ onMounted(() => {
 }
 .cashlogs .amount {
   width: convertRpxToVw(150);
+}
+.custom-title {
+  margin-right: 12px;
 }
 </style>
