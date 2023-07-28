@@ -24,7 +24,8 @@ const data = reactive<Record<string, any>>({
     logistics: {},
     logisticsTraces: [],
     extJson: {}
-  }
+  },
+  refunds: []
 })
 
 const getOrderDetail = async () => {
@@ -51,10 +52,24 @@ const getOrderDetail = async () => {
   data.orderDetail = res.data
 }
 
+const getOrderRefunds = async () => {
+  const res = await WEBAPI.orderRefunds(wx.getStorage('token'), data.orderId)
+  if(res.code !== 0) {
+    showConfirmDialog({
+      title: '错误',
+      showCancelButton: false,
+      message: res.msg
+    })
+    return
+  }
+  data.refunds = res.data
+}
+
 onMounted(() => {
   let orderId = route.query.id
   data.orderId = orderId
   getOrderDetail()
+  getOrderRefunds()
 })
   ; (function test() {
     // data.hasMoreSelect = true 
@@ -160,6 +175,20 @@ onMounted(() => {
           <div class="right-text">¥ {{ data.orderDetail.orderInfo.amountReal }}</div>
         </div>
       </div>
+      <van-cell-group v-for="refund in data.refunds" :key="refund.id" style="margin-top: 8px;margin-bottom: 20px;">
+        <van-cell>
+          <template #title>
+            <div class="title-inner">
+              退款进度
+            </div>
+          </template>
+        </van-cell>
+        <van-cell title="退款时间" :value="refund.dateUpdate" />
+        <van-cell title="付款金额" :value="refund.moneyPay" />
+        <van-cell title="退款金额" :value="refund.moneyRefund" />
+        <van-cell title="退款状态" :value="refund.statusStr" />
+        <van-cell title="退款备注" :value="refund.remark" />
+      </van-cell-group>
       <van-cell-group style="margin-top: 8px;margin-bottom: 20px;">
         <van-cell>
           <template #title>

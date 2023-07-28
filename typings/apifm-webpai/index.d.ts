@@ -168,6 +168,12 @@ declare module 'apifm-webapi' {
      * @param data 
      */
     function banners(data: Record<string, any>): Promise<ApifmResponse>
+    /**
+     * 获取订单退款记录
+     * @param token 登录返回的token 
+     * @param orderId 订单id 
+     */
+    function orderRefunds(token: string, orderId: string): Promise<ApifmResponse>
   }
   export = ApifmWebapi
 }

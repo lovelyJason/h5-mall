@@ -9,6 +9,8 @@ import { wxpay } from '@/utils/wxpay'
 // @ts-ignore
 import { areaList } from '@vant/area-data';
 
+console.log(areaList)
+
 interface GoodsItem {
   basicInfo: object
   category: object

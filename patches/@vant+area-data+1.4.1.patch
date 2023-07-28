@@ -1,0 +1,71 @@
+diff --git a/node_modules/@vant/area-data/dist/index.esm.mjs b/node_modules/@vant/area-data/dist/index.esm.mjs
+index 3b2cb7a..976f45a 100644
+--- a/node_modules/@vant/area-data/dist/index.esm.mjs
++++ b/node_modules/@vant/area-data/dist/index.esm.mjs
+@@ -1,4 +1,6 @@
+ // src/index.ts
++import axios from 'axios'
++
+ var areaList = {
+   province_list: {
+     11e4: "北京市",
+@@ -3887,6 +3889,59 @@ var areaList = {
+     820204: "圣方济各堂区"
+   }
+ };
++
++// 当前我国有四个地方不设区县，只管乡镇街道，东莞，中山，海南省儋州市、海南省三沙(接口已有数据)，貌似还有个甘肃省嘉峪关市只有市辖区
++
++async function getAreaList () {
++  const res = await Promise.all([
++    axios.get('https://api.it120.cc/common/region/v2/province'), 
++    axios.get('https://api.it120.cc/common/region/v2/city'), 
++    axios.get('https://api.it120.cc/common/region/v2/districts')
++  ])
++  const provinceList = res[0].data.data
++  const cityList = res[1].data.data
++  const districtList = res[2].data.data
++
++  let dongguan_id, zhongshan_id, danzhou_id, sansha_id
++  cityList.some(val => {
++    if(val.name.includes('东莞市')) {
++      dongguan_id = val.id
++    }
++    if(val.name.includes('中山市')) {
++      zhongshan_id = val.id
++    }
++    if(val.name.includes('儋州市')) {
++      danzhou_id = val.id
++    }
++    if(val.name.includes('三沙市')) {
++      sansha_id = val.id
++    }
++    if (dongguan_id && zhongshan_id && danzhou_id && sansha_id) {
++      return true
++    }
++  })
++
++  const third_area = await Promise.all([
++    axios.get(`https://api.it120.cc/common/region/v2/child?pid=${dongguan_id}`),
++    axios.get(`https://api.it120.cc/common/region/v2/child?pid=${zhongshan_id}`),
++    axios.get(`https://api.it120.cc/common/region/v2/child?pid=${danzhou_id}`),
++  ])
++  districtList.push(...third_area[0].data.data, ...third_area[1].data.data, ...third_area[2].data.data)
++  console.log(districtList)
++  areaList.province_list = {}
++  areaList.city_list = {}
++  areaList.county_list = {}
++  provinceList.forEach(item => {
++    areaList.province_list[item.id] = item.name
++  })
++  cityList.forEach(item => {
++    areaList.city_list[item.id] = item.name
++  })
++  districtList.forEach(item => {
++    areaList.county_list[item.id] = item.name
++  })
++}
++getAreaList()
+ var makeOption = (text, value, children) => ({
+   text,
+   value,
