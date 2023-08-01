@@ -71,3 +71,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+ol, ul {
+  margin: auto !important;
+  padding: initial !important;
+}

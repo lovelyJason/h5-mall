@@ -186,6 +186,15 @@ const router = createRouter({
       component: () => import('../views/Withdrawal.vue')
     },
     {
+      path: '/notice',
+      name: 'notice',
+      meta: {
+        title: '公告',
+        auth: false
+      },
+      component: () => import('../views/Notice.vue')
+    },
+    {
       path: '/403',
       name: 'forbidden',
       meta: {

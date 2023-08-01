@@ -35,7 +35,8 @@ import {
   Popup,
   List,
   Tag,
-  Dialog
+  Dialog,
+  NoticeBar
 } from 'vant'
 // 2. 引入组件样式
 import 'vant/lib/index.css'
@@ -107,6 +108,7 @@ app.use(RadioGroup)
 app.use(Radio)
 app.use(Popup)
 app.use(List)
+app.use(NoticeBar)
 
 app.use(router)
 app.use(store)

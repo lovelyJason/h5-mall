@@ -174,6 +174,12 @@ declare module 'apifm-webapi' {
      * @param orderId 订单id 
      */
     function orderRefunds(token: string, orderId: string): Promise<ApifmResponse>
+    /**
+     * 获取公告列表
+     * @param data
+     */
+    function noticeList(data: Record<string, any>): Promise<ApifmResponse>
+    function noticeDetail(id: string | number): Promise<ApifmResponse>
   }
   export = ApifmWebapi
 }

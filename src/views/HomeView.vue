@@ -33,7 +33,8 @@ const categorySelected = reactive<any>({
 const firstCategories = reactive<Array<any>>([])
 const currentGoods = reactive<Array<any>>([])
 const data = reactive<any>({
-  banners: []
+  banners: [],
+  noticeList: {}
 })
 
 const categories = async () => {
@@ -164,9 +165,22 @@ const getBanners = async () => {
   }
 }
 
+const getNotice = () => {
+  WEBAPI.noticeList({ pageSize: 5 }).then(function (res: any) {
+    if (res.code == 0) {
+      data.noticeList = res.data
+    }
+  })
+}
+
+const goNotice = (id: number | string) => {
+  router.push('/notice?id=' + id)
+}
+
 onMounted(() => {
   getBanners()
   categories()
+  getNotice()
 })
 
 </script>
@@ -177,6 +191,15 @@ onMounted(() => {
         <van-swipe-item v-for="item in data.banners" :key="item.id">
           <img mode="aspectFill" bindtap="tapBanner" :data-url="item.linkUrl" :src="item.picUrl" />
         </van-swipe-item> 
+      </van-swipe>
+    </div>
+    <div class="notice-box" v-if="data.noticeList">
+      <van-swipe class="notice_swiper" vertical :autoplay="8000">
+        <van-swipe-item v-for="item in data.noticeList.dataList" :key="item.id">
+          <van-notice-bar scrollable left-icon="volume-o" v-if="data.noticeList" mode="link" :text="item.title" background="#FFFFFF"
+            data-id="{{ item.id }}" speed="30" @click="goNotice(item.id)">
+          </van-notice-bar>
+        </van-swipe-item>
       </van-swipe>
     </div>
     <van-search @clear="onSearchClear" clearable @search="searchGoodes" v-model="searchValue" placeholder="请输入搜索关键词" />
@@ -258,7 +281,7 @@ main {
 ;
 }
 .left, .right {
-  height: calc(100vh - 50px - 18vh - 1rem - 54px); // 上面增加了内容这里要缩短否则滚动条出现
+  height: calc(100vh - 50px - 18vh - 1rem - 54px - 52px); // 上面增加了内容这里要缩短否则滚动条出现
   overflow: auto;
 }
 .prod-card-footer-order {
@@ -279,5 +302,18 @@ main {
   //     border: none;
   //   }
   // }
+}
+.notice-box {
+  width: 100%;
+  height: 36px;
+  line-height: 36px;
+  border-bottom: 1px solid #efeff4;
+  margin-top: 6px;
+  margin-bottom: 10px;
+  .notice_swiper {
+    height: 36px;
+    line-height: 36px;
+    width: 100%;
+  }
 }
 </style>
