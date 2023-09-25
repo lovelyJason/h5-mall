@@ -125,14 +125,18 @@ onMounted(() => {
     <van-cell v-for="(item, index) in data.cashlogs" :key="index" :title="item.typeStr" :label="item.dateAdd" :value="item.amount">
       <template #title>
         <span class="custom-title">{{ item.typeStr }}</span>
-        <van-tag  color="#ffe1e1" text-color="#ad0000" >{{ item.remark }}</van-tag>
+        <van-tag color="#ffe1e1" text-color="#ad0000" >{{ item.remark }}</van-tag>
       </template>
     </van-cell>
   </van-cell-group>
   <van-cell-group v-if="data.activeIndex == 1">
     <van-empty v-if="data.withDrawlogs.length <= 0" description="暂无提现记录" />
-    <van-cell v-for="(item, index) in data.withDrawlogs" :key="index" :title="item.statusStr" :label="item.dateAdd"
-      :value="item.money" />
+    <van-cell v-for="(item, index) in data.withDrawlogs" :key="index" :title="item.statusStr" :label="item.dateAdd" :value="item.money">
+      <template #title>
+        <span class="custom-title">{{ item.statusStr }}</span>
+        <van-tag color="#ffe1e1" text-color="#ad0000" >{{ item.rejectionReason }}</van-tag>
+      </template>
+    </van-cell>
   </van-cell-group>
 </template>
 

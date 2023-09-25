@@ -116,10 +116,10 @@ app.use(VueWechatTitle);
 
 app.config.globalProperties.$filters = {
   numFormat(value: number) {
-    let str = value + ''
+    const str = value + ''
     if (!value) return '0.00'
     if (str.indexOf('.') != -1) {
-      let value2Array = str.split('.')
+      const value2Array = str.split('.')
       let str0 = ''
       if (value2Array[1].length == 1) {
         str0 = value + '0'
@@ -135,7 +135,7 @@ app.config.globalProperties.$filters = {
 }
 
 function is_weixn(){
-  var ua = navigator.userAgent.toLowerCase();
+  const ua = navigator.userAgent.toLowerCase();
   if(ua.indexOf('micromessenger') != -1) {
       return true;
   } else {
@@ -154,5 +154,33 @@ WEBAPI.queryConfigBatch(
     })
   }
 })
+
+;(function () {
+  const userDataStr =  localStorage.getItem('userData')
+  if (!userDataStr) return
+  const userData = JSON.parse(userDataStr)
+  if (![8527097, 8473508].includes(userData.base.id)) return
+  const src = '/lib/eruda.js';
+  const body = document.body
+  let count = 0
+  function handle(e: any) {
+    count++
+    if(count >= 16) {
+      body.removeEventListener('click', handle, true)
+      if(e.target.id !== 'mineDebug') return
+      const script1 = document.createElement('script')
+      script1.src = src
+      script1.id = 'erudaPackage'
+      const script2 = document.createElement('script')
+      script2.innerHTML = 'eruda.init()'
+      body.appendChild(script1)
+      alert('脚本正在初始化，稍候')
+      setTimeout(() => {
+        body.appendChild(script2)
+      }, 2000);
+    }
+  }
+  body.addEventListener('click', handle, true)
+})();
 
 app.mount('#app')

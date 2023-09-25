@@ -103,6 +103,30 @@ const getWxUserInfo = async () => {
   redirectToWechatAuth(false, redirect_url, '1') 
 }
 
+const loadEruda = () => {
+  const src = '/lib/eruda.js';
+  const body = document.body
+  let count = 0
+  function handle(e: any) {
+    count++
+    if(count >= 16) {
+      body.removeEventListener('click', handle, true)
+      if(e.target.id !== 'mineDebug') return
+      const script1 = document.createElement('script')
+      script1.src = src
+      script1.id = 'erudaPackage'
+      const script2 = document.createElement('script')
+      script2.innerHTML = 'eruda.init()'
+      body.appendChild(script1)
+      alert('脚本正在初始化，稍候')
+      setTimeout(() => {
+        body.appendChild(script2)
+      }, 2000);
+    }
+  }
+  body.addEventListener('click', handle, true)
+}
+
 onMounted(() => {
   // wx.configByurl(location.href, ['showAllNonBaseMenuItem'])
   // wx.ready(() => {
@@ -111,9 +135,10 @@ onMounted(() => {
   user.checkHasLogined().then(async (_isLogined: boolean) => {
     isLogined.value = _isLogined
     if (_isLogined) {
-      Promise.all([user.getUserApiInfo(), userAmount()])
+      await Promise.all([user.getUserApiInfo(), userAmount()])  
     }
   })
+  
 })
 
 onBeforeUnmount(() => {
