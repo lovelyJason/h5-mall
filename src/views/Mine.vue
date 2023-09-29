@@ -127,17 +127,21 @@ const loadEruda = () => {
   body.addEventListener('click', handle, true)
 }
 
-onMounted(() => {
+onMounted(async () => {
   // wx.configByurl(location.href, ['showAllNonBaseMenuItem'])
   // wx.ready(() => {
   // })
   readConfigVal()
-  user.checkHasLogined().then(async (_isLogined: boolean) => {
+  try {
+    const _isLogined = await user.checkHasLogined()
     isLogined.value = _isLogined
     if (_isLogined) {
-      await Promise.all([user.getUserApiInfo(), userAmount()])  
+      Promise.all([user.getUserApiInfo(), userAmount()])  
     }
-  })
+  } catch(error: any) {
+    console.log(error.message)
+    isLogined.value = false
+  }
   
 })
 
