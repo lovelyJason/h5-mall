@@ -204,13 +204,15 @@ onBeforeUnmount(() => {
       </div>
     </div>
     <div class="space"></div>
-    <van-cell v-if="config.fx_type == 'hehuoren'" title="分销中心" is-link />
-    <van-cell-group v-else-if="config.show_3_seller == 1" title="三级分销">
-      <van-cell v-if="user.userData.base.isSeller" title="分销中心" is-link @click="router.push('/distribution')" />
-      <!-- <van-cell v-else title="成为分销商" :is-link="true" @click="router.push('/apply')" /> -->
-      <van-cell v-if="user.userData.base.isSeller" title="我的团队" is-link @click="router.push('/myusers')" />
-      <van-cell v-if="user.userData.base.isSeller" title="推广订单" is-link @click="router.push('/commision-orderlist')" />
-    </van-cell-group>
+    <template v-if="isLogined">
+      <van-cell v-if="config.fx_type == 'hehuoren'" title="分销中心" is-link />
+      <van-cell-group v-else-if="config.show_3_seller == 1" title="三级分销">
+        <van-cell v-if="user.userData.base.isSeller" title="分销中心" is-link @click="router.push('/distribution')" />
+        <!-- <van-cell v-else title="成为分销商" :is-link="true" @click="router.push('/apply')" /> -->
+        <van-cell v-if="user.userData.base.isSeller" title="我的团队" is-link @click="router.push('/myusers')" />
+        <van-cell v-if="user.userData.base.isSeller" title="推广订单" is-link @click="router.push('/commision-orderlist')" />
+      </van-cell-group>
+    </template>
     <van-cell-group title="其他功能">
       <van-cell title="设备信息" is-link @click="router.push('/info')" />
       <van-cell title="系统设置" is-link @click="router.push('/settings')" />

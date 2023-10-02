@@ -270,9 +270,10 @@ const getInviteQrcode = async () => {
   data.inviteLink = res.data.data.replace('https://mp.weixin.qq.com', 'https://mall.qdovo.com/wechat_image')
 }
 
-onMounted(() => {
+onMounted(async () => {
   adPosition()
-  user.checkHasLogined().then(async (isLogined: boolean) => {
+  try {
+    const isLogined = await user.checkHasLogined()
     if (isLogined) {
       await user.getUserApiInfo()
       handleUserInfo()
@@ -284,7 +285,9 @@ onMounted(() => {
         message: '登录失效，需要重新获取授权信息'
       })
     }
-  })
+  } catch (error: any) {
+    console.log(error.message)
+  }
 })
 
 const gotoAssets = () => {

@@ -288,15 +288,23 @@ router.beforeEach(async (to, from) => {
     if(to.meta.auth) {
       // TODO:怎么在router中访问pinia是个问题
       if(userDisabled) return '/403'
-      let isLogined = await checkHasLogined()
-      if(!isLogined) {
+      try {
+        let isLogined = await checkHasLogined()
+        if(!isLogined) {
+          showToast('检测到您未登录，正在为您登录中...')
+          setTimeout(() => {
+            let redirect_url = location.href  // 等于from的地址
+            redirectToWechatAuth(false, redirect_url, '1') // ③ 还是要非静默授权设置上头像，昵称
+          }, 800)
+        } else {
+          return true
+        }
+      } catch (error) {
         showToast('检测到您未登录，正在为您登录中...')
         setTimeout(() => {
           let redirect_url = location.href  // 等于from的地址
           redirectToWechatAuth(false, redirect_url, '1') // ③ 还是要非静默授权设置上头像，昵称
         }, 800)
-      } else {
-        return true
       }
     }
   }
