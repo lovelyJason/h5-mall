@@ -4,6 +4,7 @@ import wx from '@/lib/wx';
 import { ref, reactive, onMounted, inject, toRefs } from 'vue'
 import { useRouter } from 'vue-router';
 import { showFailToast } from 'vant';
+import { getCurrentInstance } from "vue";
 
 export interface GoodsListReq {
   categoryId?: string
@@ -178,6 +179,7 @@ const goNotice = (id: number | string) => {
 }
 
 onMounted(() => {
+  console.log(getCurrentInstance())
   getBanners()
   categories()
   getNotice()
@@ -190,7 +192,7 @@ onMounted(() => {
       <van-swipe class="my-swipe swiper1" :autoplay="6000" indicator-color="white">
         <van-swipe-item v-for="item in data.banners" :key="item.id">
           <img mode="aspectFill" bindtap="tapBanner" :data-url="item.linkUrl" :src="item.picUrl" />
-        </van-swipe-item> 
+        </van-swipe-item>
       </van-swipe>
     </div>
     <div class="notice-box" v-if="data.noticeList">
