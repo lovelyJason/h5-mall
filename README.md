@@ -1,4 +1,4 @@
-![image](https://github.com/lovelyJason/h5-mall/assets/50656459/adc068d8-21e4-4210-8689-196f89c6950e)
+<img  width="375" src="https://github.com/lovelyJason/h5-mall/assets/50656459/adc068d8-21e4-4210-8689-196f89c6950e" />
 
 
 # 微信公众号网页开发步骤
