@@ -1,3 +1,6 @@
+![image](https://github.com/lovelyJason/h5-mall/assets/50656459/adc068d8-21e4-4210-8689-196f89c6950e)
+
+
 # 微信公众号网页开发步骤
 
 以下接口有微信的api请求形式和api工厂的sdk apifm-webapi调用形式；另外下文的access_token与基础支持的access_token不同
